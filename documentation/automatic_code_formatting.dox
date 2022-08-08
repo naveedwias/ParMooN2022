@@ -1,0 +1,46 @@
+/**
+\page automatic_code_formatting Automatic code formatting
+\brief A brief description on how to use code formatting tools in ParMooN
+
+\attention this has only been tested a little bit and only on Linux
+
+\tableofcontents
+
+We tested two tools for automatic code formatting. They give different results 
+and therefore we decided to stick one of them, namely *clang format*. Sometimes
+it might still be interesting to use *astyle*, so here are the commands you can
+use to call these tools.
+
+
+\section astyle astyle
+
+You can use astyle as a formating tool with the given options file as follows 
+(one line)
+\code{.sh}
+astyle --options=data/code_formatting/astyle_preferences.options "src/*.C" "include/*.h" "test/*.c++" "2DPrograms/*.C" "3DPrograms/*.C"
+\endcode
+
+
+Note that this assumes, you are in the base directory of ParMooN. Also you need
+to pass the wildcards to astyle instead of resolving them by your console (so 
+you need the quotation marks). 
+
+\section clang-format clang-format
+
+To use clang-format you have to specify an options file. For some reason this 
+file must be in the current directory. So you have to call this tool from 
+within `ParMooN/data/code_formating`: (one line)
+\code{.sh}
+clang-format -style=file -i ../../src/*/*.C ../../include/*/*.h ../../test/*.c++ ../../2DPrograms/*.C ../../3DPrograms/*.C
+\endcode
+ParMooN developers should call this before every commit. The option 
+`-style=file` tells *clang-format* to use a file where all the options are in. 
+This file has to have a certain name ('_clang_format') which is why this can 
+not be called from the main ParMooN directory, because then one would have to 
+copy that file into that directory. I would rather like to keep the main 
+directory clean. The option `-i` changes the files in place, i.e., it does not 
+create backups. You have to rely on the version control system to undo such 
+formatting.
+
+
+*/

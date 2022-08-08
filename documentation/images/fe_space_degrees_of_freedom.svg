@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   viewBox="0 -1 400 202"
+   height="609"
+   width="1000">
+  <g>
+    <g id="lines" stroke="black" stroke-width="1" fill="none">
+      <line x1="60" y1="200" x2="60" y2="0"  /> <!--vertical line-->
+      <line x1="50" y1="200" x2="70" y2="200"/> <!--bottom horizontal line-->
+      <line x1="50" y1="0"   x2="70" y2="0"  /> <!--top horizontal line-->
+      
+      <line x1="55" y1="90"  x2="65" y2="90" /> <!--1st horizontal line-->
+      <line x1="55" y1="130" x2="65" y2="130"/> <!--2nd horizontal line-->
+      <line x1="55" y1="180" x2="65" y2="180"/> <!--3rd horizontal line-->
+      <g stroke-dasharray="8,8" stroke="lightgray" >
+        <line x1="80" y1="0" x2="280" y2="0"/>
+        <line x1="80" y1="130" x2="185" y2="130"/>
+        <line x1="80" y1="180" x2="280" y2="180"/>
+      </g>
+      <path d="M 45,200 C 30,200 50,110 35,100 C 50,90 30,0 45,0"  /> <!--left brace-->
+      <path d="M 75,89  c 10,0 0,-41 10,-45 c -10,-4 0,-44 -10,-44"/> <!--brace inner-->
+      <path d="M 75,129 c 10,0 0,-18 10,-20 c -10,-2 0,-18 -10,-18"/> <!--brace non-dirichlet-->
+      <path d="M 75,179 c 10,0 0,-23 10,-25 c -10,-2 0,-23 -10,-23"/> <!--brace hanging-->
+      <path d="M 75,200 c 10,0 0,-9  10,-10 c -10,-1 0,-9  -10,-9" /> <!--brace dirichlet-->
+      <path d="M 185,130 c 10,0 0,-60 10,-65 c -10,-5 0,-65 -10,-65"/> <!--brace active_non_hanging-->
+      <path d="M 282,180 c 10,0 0,-85 10,-90 c -10,-5 0,-90 -10,-90"/> <!--brace active-->
+    </g>
+    <text font-size="5" dominant-baseline="middle" font-family="monospace">
+      <tspan x="0"  y="100">get_n_dof()</tspan>
+      <tspan x="90" y="45" >get_n_inner()</tspan>
+      <tspan x="90" y="110" >get_n_non_dirichlet_boundary()</tspan>
+      <tspan x="90" y="155">get_n_hanging()</tspan>
+      <tspan x="90" y="190">get_n_dirichlet()</tspan>
+      <tspan x="200" y="65">get_n_active_non_hanging()</tspan>
+      <tspan x="297" y="90">get_n_active()</tspan>
+    </text>
+  </g>
+</svg>

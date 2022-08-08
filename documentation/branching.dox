@@ -1,0 +1,25 @@
+/**
+\page page_branching Branching workflow in ParMooN
+
+\brief This is a guide to the branching workflow in ParMooN.
+
+\tableofcontents
+
+
+
+\section preface Preface
+
+We use branches to develop the core of ParMooN. Most notably are the branches
+`master` and `development`. All commits the developers make should be on the 
+`development` branch. The `master` branch is a verified (i.e., all tests 
+passed) version.
+
+You can switch to a branch via 
+
+    git switch development
+
+or
+    git switch master
+
+
+\todo More details on the git workflow

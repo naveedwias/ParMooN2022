@@ -1,0 +1,604 @@
+/**
+\page page_rules Coding conventions for ParMooN developers
+\brief How to write good code.
+
+\tableofcontents
+
+Introduction
+============
+
+Code conventions improve the readability of the software, allowing
+programmers to understand new code more quickly and thoroughly. Over the
+course of time a lot of people wrote code for MooNMD and ParMooN and
+there will be more coders in the future, who will need to get into the
+concepts of ParMooN.
+
+Note that there is a lot of existing code that does not follow these
+guidelines yet and the code should be changed accordingly when
+convenient. New code however should be written with these rules in mind.
+
+Class Organization
+==================
+
+In class headers the functions and member variables are ordered by
+visibility, beginning with `public` on the top, followed by `protected` and
+`private`. Public members are most likely the main interest, that is why they
+should be put first to be found easily.
+
+Naming Conventions
+==================
+
+We differentiate between type names, method names and variable names.
+Type names are written in so called *upper camel case*, e.g. the first
+letter of each word in a name is capitalized. Contrary to that, method
+names and variable names are written in lower case entirely. Either 
+*lower camel case*, which is the same as *upper camel case*, but starting with 
+a lower case letter, or using underscores between words. Stick to one naming 
+within each file.
+
+Type and variable names are nouns. Method names are verbs that describe
+the method’s effect, or describe the return value of a method that has
+no effect.
+
+All functions which return a bool should ask a true/false question, such
+as `isVisible()`, or `shouldClearBuffer()`.
+
+Functions which return a value should describe the return value; the name
+should make clear what value the function will return. This is
+particularly important for boolean functions. Consider the following two
+example methods:
+
+\code{.cpp}
+ // what does true mean?
+ bool checkMatrix( TMatrix matrix )
+
+ // name makes it clear: true means matrix has full rank
+ bool hasFullRank( TMatrix matrix )
+\endcode
+
+Naming getters and setters for class member variables follow the patterns
+-   for boolean variables
+    \code{.cpp}
+     // boolean getter
+     isBoolVariableName()
+     
+     // boolean setter
+     setBoolVariableName()
+    \endcode
+
+-   for all other types
+    \code{.cpp}
+     // getter
+     get_variable_name()
+     getVariableName()
+     
+     // setter
+     set_variable_name()
+     setVariableName()
+    \endcode
+
+So even private class members along with other variables, methods
+and class names should be clear, unambiguous, and descriptive.
+The greater the scope of the name, the greater the
+importance of a good, descriptive name. So avoid names that
+
+-   consist of only one letter. Loop iterators for small loops can be an
+    exception.
+         \code{.cpp}
+          // bad
+          double x, y;
+          int i, j, k;
+          
+          // good, allowed
+          for ( int i = 0; i < numCells; ++i )
+          {
+              // do something with cells[i]
+          }
+         \endcode
+
+-   are too general. `temp` as abbreviation for temperature is legitimate.
+         \code{.cpp}
+          // bad
+          temp, aux, counter, data
+          
+          // good
+          // temperature
+          double temp;
+          unsigned long cellCounter;
+         \endcode
+
+Avoid over-abbreviation. Long variable names do not cost anything.
+
+All variables should be declared one at a time so that a comment on the
+meaning of the variable can be provided. Also, the Doxygen
+style requires it. You can use multi-line or single line comments before
+a variable.
+
+
+Comments
+========
+
+Comments are communication; communication is vital. We use Doxygen to
+automatically extract comments from the code and build an HTML
+documentation, so there are some specific comment rules to follow.
+
+-   use Doxygen comments in header files to document classes, methods
+    and variables
+
+-   these comments contain information relevant to callers of the method
+
+    Header file:
+         \code{.cpp}
+          /**
+           * Integrates a function rhs between a and b.
+         * *
+           * @param a begin of integration interval
+           * @param b end of integration interval
+           * @return integral value
+           */
+          double integrate( const double a, const double b );
+         \endcode
+
+-   no Doxygen comments within the implementation (source file)
+
+Sometimes the documentation of a class, method or variable is not up to date 
+after changing the code but not its documentation. This can lead to quite some 
+frustration, so please try to update the documentation whenever you change the 
+code. On the other hand this means the more obvious it is what the code does,
+the less documentation is needed and therefore can be outdated. 
+
+
+Comments in implementation
+--------------------------
+
+-   Write self-documenting code.
+\code{.cpp}
+ // Bad:
+ v  = 2 + e - f;
+ 
+ // Good:
+ // Euler formula for a planar graph
+ vertices = 2 + edges - faces;
+\endcode
+
+-   Write useful comments, concentrate on *why* not *what*. In the
+    following code it is obvious *what* is done with `edges`,
+    but not *why* `edges` is incremented.
+         \code{.cpp}
+          // Bad:
+          // increment edges
+          ++edges;
+
+          // Good:
+          // we added a new edge to the graph
+          ++edges;
+         \endcode
+
+-   Do not comment bad code - rewrite it.
+         \code{.cpp}
+          // Bad:
+          // total number of vertices is sum of
+          // two and the number of edges less the
+          // number of faces in a planar graph by the Euler formula
+          v  = 2 + e - f;
+
+          // Good:
+          // Euler formula for a planar graph
+          verticies = 2 + edges - faces;
+         \endcode
+
+-   Do not contradict the code.
+         \code{.cpp}
+          // Bad:
+          // never increment edges!
+          ++edges;
+
+          // Good:
+          // we added a new edge to the graph
+          ++edges;
+         \endcode
+
+Doxygen comments
+----------------
+
+The following example demonstrates the format of class, method, and
+variable comments. Remember that comments should augment the code. The
+code documents the implementation and the comments document the intent.
+Make sure to update comments when you change the intent of a piece of
+code.
+
+Note that two different parameter comment styles are supported, namely
+JavaDoc (`@param`) and classic Doxygen style (`\param`).
+
+\code{.cpp}
+ #pragma once
+ 
+ #include <memory>
+
+ /**
+  * @class MyClass
+  * @author Felix Anker
+  * @brief A test class
+* *
+  * This class is a simple test case to demonstrate
+  * good coding style.
+  * Code documentation will also be shown.
+  */
+ class MyClass
+ {
+   public:
+     /**
+      * Default constructor initializes MyClass::data
+      * with zeroes.
+      */
+     MyClass();
+    
+     /**
+      * Declaring constructor for move semantics.
+      * @param other object to be moved
+      */
+     MyClass( MyClass&& other ) noexcept;
+
+     /**
+      * Declaring a copy constructor.
+      * @param other object to be copied
+      */
+     MyClass( const MyClass& other );
+
+     /**
+      * Declaring default destructor,
+      * freeing up the memory from MyClass::data.
+      */
+     ~MyClass() noexcept;
+     
+     /**
+      * @brief Get a pointer to the data.
+      *
+      * Length of data is 10.
+      *
+      * @return pointer to data
+      */
+     const int* getData();
+
+   protected:
+     /*
+     * We have no protected class members but they would
+     * be placed here.
+     * Note that this block comment will not appear in the
+     * Doxygen documentation as it only starts with one star.
+     */
+
+   private:
+     /// data field to save results from calculations
+     int data[10];
+
+     /**
+      * @brief Fill MyClass::data with n.
+      * 
+      * @param n initialize MyClass::data with n in each element.
+      */
+     void fillData( int n )       
+ };
+\endcode
+
+-   What does a class comment include?
+
+    -   A description of the problem this class solves. Ask yourself:
+        Why was this class created?
+
+-   What do all those parts of the method comment mean?
+
+    -   The purpose of the function is first; this documents the problem
+        this function solves. As has been said above, comments document
+        intent and code documents implementation.
+
+    -   Next are the parameter comments; each parameter comment should
+        contain information about valid and invalid values, what
+        exceptions are possibly thrown. Sometimes it is clear from the header
+        if function arguments are input or output. Especially for pointers or
+        references it is recommended to use `[in]`, `[out]` or `[in,out]` to 
+        indicate their usage. To avoid ambiguities use the `const` as much as
+        possible.
+
+    -   The last is the return comment; it documents the expected return
+        value and its range.
+
+C++ 11 and Modern Language Syntax
+=================================
+
+We are utilizing certain C++ 11 language features, such as the keyword `auto`,
+range-based-for-loops, lambdas and move semantics. Also `shared_ptr` are highly
+appreciated as they make memory management much easier. Please make
+yourself familiar with these language features.
+
+Code Formatting
+===============
+
+A well defined formatting helps to avoid commits which are purely cosmetic. Such
+commits bloat the history of the version control system making it increasingly 
+difficult to work with it. To avoid this and to get a homogeneous look of the 
+code some formatting rules are necessary. 
+
+These rules are not enforced strictly, violations will not be punished (in 
+general) but still please stick to these rules. There are tools which can help
+you a lot doing so, see 
+[automatic code formatting](@ref automatic_code_formatting).
+
+Braces { }
+----------
+
+Braces should be put on a new line each. Always use braces, even where
+no braces are explicitly needed, i.e. on one line statements. This
+avoids errors when incautiously extending those statements.
+
+\code{.cpp}
+ // bad - no braces
+ for( int i = 0; i < numCells; ++i )
+   std::cout << cells[i] << std::endl;
+
+ if( matrix.hasFullRank() )
+   invMatrix = matrix.inverse();
+    
+ // bad - braces not on new line
+ for( int i = 0; i < numCells; ++i ) {
+   std::cout << cells[i] << std::endl;
+ }
+ 
+ if( matrix.hasFullRank() ) {
+   invMatrix = matrix.inverse();
+ }
+ 
+ // good
+ for( size_t i = 0; i < numCells; ++i )
+ {
+   std::cout << cells[i] << std::endl;
+ }
+
+ if( matrix.hasFullRank() )
+ {
+   invMatrix = matrix.inverse();
+ }
+\endcode
+
+Parentheses ( ) - mandatory
+---------------------------
+
+In function declarations or function call sites, do not add a space
+between the function’s name and the parentheses that precedes the
+argument list.
+
+\code{.cpp}
+ // bad
+ matrix.hasFullRank ();
+ matrix.pseudoInverse ();
+ 
+ // good
+ matrix.hasFullRank();
+ matrix.pseudoInverse();
+\endcode
+
+Parentheses ( ) - optional
+--------------------------
+
+A blank space can enhance readability. I usually put one after a left
+parentheses and one before a right parentheses if there is some content
+enclosed.
+
+-   `if` clause
+        \code{.cpp}
+         if( matrix.hasFullRank() )
+        \endcode
+
+-   `for` loop
+        \code{.cpp}
+         for( int i = 0; i < numCells; ++i )
+        \endcode
+
+-   function call
+        \code{.cpp}
+         funcCallWithParameters( "String param", iParam, dParam, true )
+        \endcode
+
+If - Else
+---------
+
+Each block of execution in an if-else statement should be in braces.
+\code{.cpp}
+ if( matrix.hasFullRank() )
+ {
+   invMatrix = matrix.inverse();
+ }
+ else
+ {
+   invMatrix = matrix.pseudoInverse();
+ }
+\endcode
+
+A multi-way if statement should be indented with each else if indented
+the same amount as the first if; this makes the structure clear to a
+reader:
+\code{.cpp}
+ if( someValue < 10 )
+ {
+   std::cout << "Low value" << std::endl;
+ }
+ else if( someValue < 100 )
+ {
+   std::cout << "Medium value" << std::endl;
+ }
+ else
+ {
+   std::cout << "High value" << std::endl;
+ }
+\endcode
+
+Tabs
+----
+
+Indent code by execution block.
+
+Use spaces, not tabs, for whitespace at the beginning of a line. Set
+your tab size to 2 characters. However, spaces are sometimes necessary
+and allowed for keeping code aligned regardless of the number of spaces
+in a tab; e.g. when aligning code following non-tab characters.
+
+\code{.cpp}
+ void VeryLongClassName::lotsOfParameters( double dvalue,
+                                           long long bigNumber,
+                                           MyClass& myObject );
+\endcode
+
+Switch Statements
+-----------------
+
+Except for empty cases (multiple cases having identical code), switch
+case statements should explicitly label that a case falls through to the
+next case. Either include a break or a falls-through comment in each
+case. Other code control-transfer commands (`return`, `continue`, etc.) are fine as well.
+
+Always have a default case, and include a `break` - just in case someone adds a
+new case after the default.
+\code{.cpp}
+switch ( condition )
+{
+  case 1:
+    ...
+    // falls through
+  case 2:
+    ...
+    break;
+  case 3:
+    ...
+    return;
+  case 4:
+  case 5:
+    ...
+    break;
+  default:
+    break;
+ }
+\endcode
+
+Physical Dependencies
+=====================
+
+All headers should protect against multiple includes with the `#pragma once` directive
+or an include guard when a compiler does not support `#pragma once`. For a list of
+supporting compilers please refer to
+[Wikipedia](https://en.wikipedia.org/wiki/Pragma_once#Portability).
+
+\code{.cpp}
+ #pragma once
+
+ <file contents>
+\endcode
+
+In general, try to minimize file dependencies, but include as fine
+grained as possible.
+
+Try to include every header you need directly, to make fine-grained
+inclusion easier. Do not rely on a header that is included indirectly by
+another header you include. Do not rely on being included through
+another header; include everything you need.
+
+Sometimes forward declarations are sufficient. This can reduce compile times 
+and every developer is therefore free to use those instead of including other
+header files, where appropriate.
+
+General Style Issues
+====================
+
+-   define variables where they are used, reduce their scope as much as possible
+
+-   don’t use the same variable for different purposes, create a new one
+
+-   split methods into sub-methods where possible
+
+-   limit the size of a method to a minimum, we don't want to scroll through 
+    hundreds of lines within just one method
+
+-   address compiler warnings and don’t commit code with warnings
+
+-   leave a blank line at the end of each file, `gcc` needs them
+
+-   enforce encapsulation with the protection keywords (class members
+    should be declared private unless they are part of the public
+    interface to the class)
+
+-   use `const` wherever possible, `const` is documentation as much as it is a compiler
+    directive
+    
+-   to write text to console use the methods provided in the namespace `Output`
+
+-   debug code should not be committed
+         \code{.cpp}
+          // print cells to check whether they are still the same
+          for( int i = 0; i < numCells; ++i )
+          {
+            Output::print(cells[i]);
+          }
+         \endcode
+
+-   use intermediate variables to simplify complicated expressions
+         \code{.cpp}
+          // bad
+          if ( ( Blah->BlahP->ChessBoard->exists() && stuff ) &&
+              !( playerExists && gameStarted && playerStillHasPawn &&
+              isTuesday() ) ) )
+          {
+            doSomething();
+          }
+          
+          // good
+          const bool isLegalBoard = Blah->BlahP->ChessBoard->exists()
+                                 && stuff;
+          const bool isPlayerWithPawn = playerExists
+                                     && gameStarted
+                                     && playerStillHasPawn
+                                     && isTuesday();
+          if( isLegalBoard && !isPlayerWithPawn )
+          {
+            doSomething();
+          }
+         \endcode
+
+-   use the `virtual` and `override` keywords. When declaring a virtual function in a derived
+    class that overrides a virtual function in the parent class, you
+    must use both the `virtual` and the `override` keywords.
+         \code{.cpp}
+          class A
+          {
+            public:
+              virtual void F() {}
+          };
+          
+          class B : public A
+          {
+            public:
+              virtual void F() override;
+          };
+         \endcode
+
+-   pointers and references should only have one space, which is to the
+    right of the pointer / reference. This makes it easy to quickly find
+    all pointers or references of a certain type in files.
+         \code{.cpp}
+          // bad
+          TMatrix *matrix
+          TMatrix * matrix
+          TMatrix &matrix
+          TMatrix & matrix
+          
+          // good
+          TMatrix* matrix
+          TMatrix& matrix
+         \endcode
+
+-   avoid pure pointers as much as possible. They should only be used in case
+    the memory is not managed through this pointer. There is a high risk that
+    object is changed/destroyed without the pointer noticing. Please use objects
+    where possible and references, `std::shared_ptr`, or other smart pointers 
+    otherwise. Essentially you should avoid any call to `delete`. Note however 
+    that this rule is violated many times in the older code of ParMooN.
+    
+ */

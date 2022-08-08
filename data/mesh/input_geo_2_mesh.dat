@@ -1,0 +1,15 @@
+======================================================================
+#       input file for ParMooN (new version)
+======================================================================
+
+outfile: mesh_tests.out
+
+boundary_file: ./doubleRiverbed.PRM
+geo_file: ./doubleRiverbed1.xGEO
+mesh_file: ./doubleRiverbed.mesh
+
+
+
+
+
+

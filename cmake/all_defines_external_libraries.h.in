@@ -1,0 +1,13 @@
+// all defines from configure time
+// DO NOT EDIT!
+#cmakedefine PARMOON_WITH_BLAS
+#cmakedefine PARMOON_WITH_LAPACK
+#cmakedefine PARMOON_WITH_UMFPACK
+#cmakedefine PARMOON_WITH_PARDISO
+#cmakedefine PARMOON_WITH_MPI
+#cmakedefine PARMOON_WITH_METIS
+#cmakedefine PARMOON_WITH_PARMETIS
+#cmakedefine PARMOON_WITH_MUMPS
+#cmakedefine PARMOON_WITH_SCALAPACK
+#cmakedefine PARMOON_WITH_PETSC
+#cmakedefine PARMOON_WITH_HDF5

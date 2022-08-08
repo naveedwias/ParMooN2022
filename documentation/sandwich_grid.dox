@@ -1,0 +1,79 @@
+/**
+\page page_sandwich_grid MakeSandwichGrid()
+\author Claudia Wohlgemuth <wohlgemuth@wias-berlin.de>
+\date 2018/03/26
+\brief Some explanations on the MakeSandwichGrid method and standards a general domain must meet.
+
+\tableofcontents
+
+\section Input Input
+The method MakeSandwichGrid() expects as an input the following:
+\code{.cpp}
+// array of lenght 2*N_Vertices encoding coordinates for each vertex
+double * DCORVG
+// array of lenght NVE*N_Elements2D 
+//encoding for each 2D element the vertices, which form the element
+int * KVERT
+// array of lenght N_Vertices encoding the boundary component for each vertex,
+// safes 0 for inner vertices 
+int * KNPR
+// number of vertices (of the 2D geometry)
+int N_Vertices
+// number of vertices per element (3 for tets, 4 for hexas)
+int NVE
+// defines the linear transformation between bottom plane and top plane
+double drift_x, drift_y, drift_z
+// array of lenght n_layers encoding the positions of the vertice layers
+// 0=lambda[0]<lambda[1]<...<lambda[n_layers-1]=1
+double * lambda
+\endcode
+
+Note: DCORVG encodes the coordinates of an inner vertex using Karthesian coordinates and those of a boundary vertex using the parametrisation of the boundary component. They are given as (component.tau, 0), where tau is the position of the vertex in the component.
+
+\section Hexahedrons Generate Hexahedrons (and Bricks)
+We require: For each quadringual (2D) the vertices given in KVERT (Vertices[0]=A_bot, Vertices[1]=B_bot, Vertices[2]=C_bot, Vertices[3]=D_bot) are ordered in clockwise direction. This ensures that the volume of the generated hexahedron is positive. Else the method won't run properly!!!
+
+\image html hexa_pic.png
+
+To set the joint correctly in hexa.SetJoint(face_id, joint) the face_id has to match with the ShapeDesc.
+We have 
+1. Face {0, 1, 2, 3} = {A_bot, B_bot, C_bot, D_bot} = Bottom plane
+2. Face {0, 4, 5, 1} = {A_bot, A_top, B_top, B_bot}
+3. Face {1, 5, 6, 2} = {B_bot, B_top, C_top, C_bot}
+4. Face {2, 6, 7, 3} = {C_bot, C_top, D_top, D_bot}
+5. Face {0, 3, 7, 4} = {A_bot, D_bot, D_top, A_top}
+6. Face {4, 7, 6, 5} = {A_top, B_top, C_top, B_top} = Top plane
+
+\section Tetrahedrons Generate Tetrahedrons
+We rotate each triangle (2D) so that the vertices are alphanumerical ordered (Vertices[0]=A_bot < Vertices[1]=B_bot < Vertices[2]=C_bot) with respective to the coordinates. To obtain three tetrahedrons from the prism we devide each surrounding face by an edge from the "smaller" vertex on the bottom to the "larger" vertex above. Thus, we obtain the edges (A_bot, B_top), (A_bot, C_top) and (B_bot, C_top). This defines three tetrahedrons.
+
+\image html tetra_pic.png
+
+Further we require that each tetrahedron has positive volume. If this requirement is not meet, we swap the vertices 0 and 1 in the definition of the prism. (The information whether they are interchanged is passed in the array Cell_orientation.)
+
+To set the joint correctly in tet.SetJoint(face_id, joint) the face_id has to match with the ShapeDesc. We have in case the first vertices are not changed:
+
+
+Low Tet: (Vertices: A_bot, B_bot, C_bot, C_top)
+1. Face {0, 1, 2} = {A_bot, B_bot, C_bot} = bottom plane
+2. Face {0, 3, 1} = {A_bot, C_top, B_bot} = inner joint with mid tet
+3. Face {2, 1, 3} = {C_bot, B_bot, C_top} - edge BC
+4. Face {0, 2, 3} = {A_bot, C_bot, C_top} - edge AC
+
+
+Mid Tet: (Vertices: A_bot, B_bot, B_top, C_top)
+1. Face {0, 1, 2} = {A_bot, B_bot, B_top} - edge AB
+2. Face {0, 3, 1} = {A_bot, C_top, B_bot} = inner joint with low tet
+3. Face {2, 1, 3} = {B_top, B_bot, C_top} - edge BC
+4. Face {0, 2, 3} = {A_bot, B_top, C_top} = inner joint with high tet
+
+
+High Tet: (Vertices: A_bot, A_top, B_top, C_top)
+1. Face {0, 1, 2} = {A_bot, A_top, B_top} - edge AB
+2. Face {0, 3, 1} = {A_bot, C_top, A_top} - edge AC
+3. Face {2, 1, 3} = {A_top, B_top, C_top} = top plane
+4. Face {0, 2, 3} = {A_bot, B_top, C_top} = inner joint with mid tet
+
+Note: In case the vertices 0 and 1 are interchanged the faces 2 and 3 are swaped.
+
+*/

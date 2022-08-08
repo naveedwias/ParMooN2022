@@ -1,0 +1,112 @@
+/**
+\page page_restart_simulations How to manage a simulation restart
+\author Najib Alia <Najib.Alia@wias-berlin.de>
+\date 2018/11/09
+\brief Guidelines/Checklist to manage a simulation restart
+
+\tableofcontents
+
+\section whats_restart What is meant by a simulation restart
+
+We consider two situations: 
+
+1. the most simple one where we need to use an existing 
+   pre-computed solution without necessarily re-run the same program. 
+   For example, compute 
+   a time-dependent Navier--Stokes solution, write the solution after several
+   time steps when it becomes stationary, and inject it in another problem 
+   (convection-diffusion, or stationary navier--stokes...)
+2. you are making heavy computations in parallel and, for some reasons, 
+   (memory saturation, mumps deadlock, or anything) it has been or has to 
+   be interrupted and restarted at least once.
+   
+While the first type of restart does not have many constraints, the second 
+one is more complex because you have to make sure the simulations continues
+correctly  where it stopped, introducing several constraints. We want to be able
+to continue a simulation just as if there was no interruption at all, in
+particular producing the very same solutions.
+
+The last developments in ParMooN have been able to solve a number of issues 
+and deal with these constraints.
+
+The first situation is quickly described in \ref restart_sol, while the 
+second situation is discussed using a checklist in \ref checklist_restart.
+   
+\section restart_sol Restart from an existing solution
+   
+Five parameters are involved in restarting from an existing solution.
+
+<b>1. Three parameters for the first simulation 
+      (the one you restart from):</b>
+      - write_solution_binary: true
+      - write_solution_binary_all_n_steps: 1
+      - write_solution_binary_file: some_file_name
+      
+<b>2. Two parameters for the second simulation 
+      (the one which restarts):</b>
+      - read_initial_solution true
+      - initial_solution_file: some_file_name
+
+Note that the value of 'initial_solution_file' in the second simulation needs to
+be the same as 'write_solution_binary_file' in the first. Also a larger number
+for 'write_solution_binary_all_n_steps' is useful, especially if you do not also
+set 'overwrite_solution_binary: true'.
+
+ 
+\section checklist_restart Checklist to manage a simulation restart
+
+The current code (as of 2018/11/09) enables a successful simulation restart
+when the <b>following assumptions are satisfied:</b>
+
+- the `time_step_length' and 'time_discretization' is unchanged between the
+  first and second simulation,
+- the number of `steps_per_output' is also unchanged,
+- in MPI case, the number of processors used is unchanged,
+
+The third assumption is necessary to have a restart, whereas the first 
+two ones are not. They just guarantee that the numbering of the output files
+(vtk, xdmf) are correctly done by ParMooN, i.e., the files of the second
+simulation come after the first one in the correct order and do not overwrite
+them.
+
+In this case, <b>in addition to the five parameters above, six parameters
+are involved:</b>
+
+<b>1. Two parameters to have the correct output:</b>
+- continue_output_after_restart. This one is important for the numbering.
+- time_start. This should match the time value when the first simulation wrote
+  the last solution. It is indeed important that time_start is **not** 0, not
+  only for the numbering of the output files (they will then start at 0 and may
+  overwrite existing files, unless you rename them between the first and the
+  second simulations, which is not practical), it can also reset some
+  time-dependent parameters of your simulations (BC, RHS, etc...) to the initial
+  time, which is something you probably do not want.
+      
+<b>2. In MPI case, two parameters to write metis partitioning, to 
+      be used in the first simulation:</b>
+      - write_metis: true
+      - write_metis_file: metis_partition.txt
+
+<b>3. In MPI case, two parameters to read metis partitioning, to 
+      be used in the second simulation:</b>
+      - read_metis: true
+      - read_metis_file: metis_partition.txt
+      
+\note The last 4 parameters ensure to have the same partitioning. It can
+indeed happen that, even if you apply the same number of cores, for some 
+reason the partitioning is different. This typically happens when a high number
+of cores are used (e.g., >=20) and the first and second simulations are
+run in different servers. It happened to me with 30 cores: the first simulation
+was performed on erhard-18, but it could not be restarted in erhard-01 because
+the partitioning was different and an error was being thrown when reading
+the binary files. This is where the parameters read/write_metis(_file) are helpful.
+
+
+\todo In many situations we should write the solutions of two consecutive time
+steps. Clearly this is necessary in case of time discretizations which use
+multiple previous time steps. But also for time dependent Navier-Stokes 
+equations if 'extrapolation_type' is set to 'linear', which is the default, we
+need two previous solutions. Currently, the restarted simulation only uses one
+which means, strictly speaking, we are not really computing the same solutions
+as with a single (uninterrupted) simulation.
+*/

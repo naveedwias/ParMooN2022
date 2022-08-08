@@ -1,0 +1,24 @@
+// =======================================================================
+// @(#)BoundComp3D.C        1.2 08/03/99
+//
+// Class:       TBoundComp3D
+// Purpose:     prototype of a component of a boundary part
+//
+// Author:      Volker Behns  18.06.97
+//
+// =======================================================================
+
+#include <BoundComp3D.h>
+
+// Constructor
+TBoundComp3D::TBoundComp3D(int id) : TBoundComp(id)
+{
+ //  cout << "id: " << this->physical_id << endl;
+}
+
+TBoundComp3D::TBoundComp3D(int id,int ref) : TBoundComp(id,ref)
+{
+ //  cout << "id: " << this->physical_id << endl;
+}
+
+// Methods

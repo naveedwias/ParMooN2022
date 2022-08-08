@@ -1,0 +1,366 @@
+/**
+\page page_unit_testing Unit testing, make check, and make check_all
+\author Ulrich Wilbrandt <Ulrich.Wilbrandt@wias-berlin.de>
+\author Laura Blank <Laura.Blank@wias-berlin.de>
+\date 2015/11/12
+\brief Some information on unit testing in ParMooN
+
+\tableofcontents
+
+\section why_testing Why are doing unit tests at all?
+
+In general we need to be confident that our code does what we claim it does. 
+This is not only true for the moment we write it, but it should remain true in 
+the future, even if changes are made to it by someone else. The only way to be 
+sure results have not changed, is to test. Oftentimes people to some kind of 
+testing already. They might start one of their programs and check convergence 
+orders, look at the visualization of a solution. Experienced researchers are
+often able to spot some errors this way, however it is extremely hard to find 
+out where exactly the problem has occurred and why someone had changed the code
+there. Also this way only a very specific part of the code is tested at all and
+minor differences are not identified as errors.
+
+Here is a list of reasons why we should do unit testing. 
+
+1.  Larger changes in the code can easily be done because the developers can be
+    confident that their changes work and don't introduce new bugs.
+2.  Even inexperienced developers can safely commit, knowing they did not 
+    produce bugs (at least not in the tested part of the code).
+3.  Think about interfaces rather than implementation of classes. After all 
+    classes are written to be used. Tests help to clarify what the interface 
+    should look like and capable of.
+4.  Unit tests are some sort of documentation. They demonstrate how a class is 
+    supposed to be used, similar to a reference implementation.
+5.  Unit tests are easily run and give the developer instant feedback on his 
+    work.
+6.  Most developers do testing already but throw their test once finished with
+    the implementation. Keeping the test will guarantee your code is still 
+    functioning in the future. That means there is only *little extra coding*
+    necessary.
+7.  Bad code can be identified writing tests. This includes clumsy interfaces, 
+    wrong/outdated documentation as well as memory leaks, and probably more.
+8.  Even simple tests are much better than no tests.
+9.  Finding a bug, writing a test for it, fixing the bug. This particular bug
+    will never appear again, while it might do so without the test.
+
+But what if
+-   you think you newly implemented method does not need to be tested, because
+    it is too small? Well, then the test will be small as well and take only a
+    few minutes to implement. Finding an error which turns out to be in such a 
+    function will take much more time. So testing small pieces is especially 
+    simple and should be done.
+-   you think you newly implemented method does not need to be tested, because
+    it is too large? This is a really good indication the code needs to be 
+    rewritten. We want small understandable and testable methods. So bad code 
+    is no excuse to not write tests, making the code even worse.
+
+In summary we encourage you to **create tests** whenever you write code. It is 
+strongly recommended to always **run the tests** before committing anything in 
+the version control system. 
+
+
+
+
+
+
+
+\section running_tests Running the tests
+
+You can run the test suite from within your build directory calling
+
+    make check
+after you called `cmake` of course, which is described
+\ref page_build_system "here". This will build everything needed to run the 
+test, and then run it. Internally we use `ctest` which ships with `cmake`. 
+
+
+The output will list all the tests together with their status (Passed/Failed) 
+and the duration of the test. In the end a summary is provided showing the 
+number of passed/failed tests. We always want all tests to pass. Do not commit 
+code which does not fulfill this requirement. 
+
+
+Note that cmake provides a target `make test` which does almost the same as 
+`make check`. The difference is that `make test`, similarly to calling `ctest`, 
+will not recompile your code. So changing the test or the method to be tested 
+will not change the test result. That's why ParMooN implements the `make check` 
+target which overcomes this problem. It is described in more detail in the file 
+`test/CMakeLists.txt`.
+
+\note Update (31/10/2018 Najib Alia): See the recently introduced section \ref 
+make_check_all at the end to learn about 
+
+	make check_all
+
+\subsection options_running_tests More options on running tests
+
+If you want to run only a fraction of all tests, this is possible only with 
+`ctest`. Remember that this will not recompile the test. 
+
+From within your build directory call `ctest` with options to change its 
+behavior. The man-page gives a good overview on all options. The ones that 
+might be the most useful are presented here.
+    
+- to run all tests in a more verbose mode (option `--verbose` or `-V`)
+
+      ctest --verbose
+    
+- to run a range of tests (option `--tests-information` or `-I`), for example 
+  the first three
+
+      ctest --tests-information 1,3
+  use this also to run an individual test: `ctest -I 1,1`
+  
+- run all tests whose names match a regular expression (option `--tests-regex` 
+  or `-R`)
+  
+      ctest --tests-regex matrix
+    
+- run all tests, but only write their output if they failed
+
+      ctest --output-on-failure
+
+
+\subsection debugging_tests Debugging tests
+
+The tests are normal executables, similar to the ones you get with most of the 
+standard targets, e.g. `make cd2d`. Therefore you can also use the debugger to
+run a test. Say you want to debug the first test. The executable is somewhere 
+hidden in the directory structure cmake constructs. To find out which 
+executable corresponds to a test call
+
+    ctest -I 1,1 -V -N
+
+The test is not run due to the option -N which is not introduced in the 
+previous section \ref options_running_tests. However there is a line in the 
+output starting with
+> 1: Test command: 
+The rest of that line is the executable you wanted. You can run it just like 
+any other program, in particular you can use for example the gnu debugger on 
+it. As a graphical alternative (on a Linux machine) you can try KDbg, call it 
+via `kdbg executable`.
+
+
+
+\section creating_tests Creating a new test
+
+Creating a new test is done in two steps which are described in the following
+- Create a file in the `test` subdirectory, say `matrix_test.c++`. The name of 
+  the file should ideally correspond to a file in one of the 
+  subdirectories in the `include` subdirectory. Usually one class is tested in 
+  one file. The file is a normal `c++` program. It should contain a method 
+  `main` and return `0` upon success. A failure is indicated by either 
+  returning something else than `0` or throwing an exception. Also a
+  segmentation fault indicates failure, of course. Some more remarks on this 
+  file (some do not only apply to tests, but are more general):
+  - try to include as few files as possible
+  - include only header files from the `include` subdirectory or the standard 
+    library
+  - you can define functions if you like
+  - you can test a number of methods of a class within one test file, typically 
+    there is one test file per class
+  - the test can be quite verbose, during the regular call to `make check` all
+    output is suppressed anyway. 
+    
+- add the test to the file `test/CMakeLists.txt`. In this file you add the 
+  following lines
+  \code{.cmake}
+  add_executable(ParMooN_test_matrix matrix_test.c++)
+  target_link_libraries(ParMooN_test_matrix parmoon_2d_${PARMOON_PARALLEL_TYPE})
+  add_test(matrix ParMooN_test_matrix)
+  list(APPEND parmoon_tests ParMooN_test_matrix)
+  \endcode
+  The first line defines an executable, called `ParMooN_test_matrix`, with your 
+  test file. The name of the executable is usually preceeded by `ParMooN_`. The 
+  second line makes sure the executable is linked to the correct library. If
+  you test something in 3D, you have to replace the `2d` in 
+  `parmoon_2d_${PARMOON_PARALLEL_TYPE}` by `3d`. The third line creates a test
+  using the executable. The name of the test is simply matrix. You can choose 
+  any meaningful name here. The last line is needed only so that `make check` 
+  works as described above. It adds the test to the list of tests.
+
+
+
+
+\section testing_mac Testing on a Mac
+
+In the case that some tests fail similar to the following example
+
+\code
+29/30 Test #29: multigrid_2d .....................***Not Run   0.00 sec
+Start 30: multigrid_3d
+Test not available without configuration.  (Missing "-C <config>"?)
+\endcode
+
+the strategy below is possibly a remedy.
+The reason for the fail might be that in the
+\code
+Build/CMakeCache.txt
+\endcode
+the slot
+
+\code
+CMAKE_CONFIGURATION_TYPES:STRING=
+\endcode
+
+is set to
+
+\code
+Debug; Release; MinSizeRel; RelWithDebInfo
+\endcode
+
+or something else. \n
+<b>Make sure that nothing is assigned here.</b>
+
+<i>Remark</i>:\n
+The parameter
+\code
+CMAKE_BUILD_TYPE:STRING=
+\endcode
+can be chosen to be
+\code
+Debug; Release; MinSizeRel; RelWithDebInfo.
+\endcode
+
+This choice has direct consequences on the compile time (due to optimization restrictions) and debug information.\n
+Debug: standard mode with debug information\n
+Realease: increased compile time (high level of optimization at the compile time) &harr decreased run-time ; no debug information available\n
+MinSizeRel: ... \n
+RelWithDebInfo: increased compile time (high level of optimization at the compile time) &harr decreased run-time ; debug information available\n
+\n
+Note: In practice, a decreasing compile time typically correlates with an increasing run-time and vice versa.
+
+
+\section make_check_all Short and long tests, make check and make check_all
+\note Update (31/10/2018 by Najib Alia): This new section explains the newly 
+introduced target "make check_all".
+
+With the further developement of ParMooN and the increasing number of new features, 
+the list of tests has extended, as well as the duration of some tests. For example,
+ one system class (for example Navier--Stokes) is now tested with different finite 
+ elements (different orders, triangles, quads), different formulations (laplace 
+ type, nse_nonlinear_form, ns type...), different time discretizations 
+ (crank_nicholson, backward euler, and soon bdf2), and different solvers. 
+ This systematic testing is very important and encouraging. However, the duration 
+ of the tests has became too long and makes further development not practical.  
+
+In order to support systematic and extended tests and to make small developements 
+quickly "testable" without being penalized by the long testing time, a new target 
+called 
+
+	make check_all
+
+has been introduced.
+
+ - <b> 1) A few words on how it works: </b>
+ 
+ The short and long tests are differentiated by the name of the test: append
+ the suffixe "_all" to a test name will tell "make check" NOT to run this test. Indeed, you can see in the definition 
+ of the target (see CMakeLists.txt in your ParMooN directory):
+ \code{.cmake}
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -E all
+                  DEPENDS ${parmoon_tests})
+  \endcode
+  that "make check" will EXCLUDE all the tests containing the string "all", through
+  the arguments "-E all". 
+ 
+ On the contrary, there is no argument with "all" in the target "make check_all". 
+ Thus, "make check_all" will just run all the tests, including the "all" ones.
+ 
+ - <b> 2) How to append "all" to a test name? </b>
+ 
+ Read first section \ref creating_tests to create a test. Then just copy-paste
+ the command "add_test" and give the new name to the test. For example, using the
+ same example as section \ref creating_tests :
+ \code{.cmake}
+  add_test(matrix ParMooN_test_matrix)
+  add_test(matrix_all ParMooN_test_matrix)
+ \endcode
+  
+  - <b> 3) And now? </b>
+  
+  Appending "all" will of course not make your test longer. The idea is to
+  add an argument (a "flag") when calling the test program to tell him to 
+  run the long version.
+  First, it is important to notice that:
+ \code{.cmake}
+  add_test(matrix_all ParMooN_test_matrix)
+ \endcode
+ can equivalently be written as:
+ \code{.cmake}
+  add_test(NAME matrix_all COMMAND ParMooN_test_matrix)
+ \endcode
+
+Then, you can add an argument to the COMMAND, for example:
+ \code{.cmake}
+  add_test(NAME matrix_all COMMAND ParMooN_test_matrix testall)
+ \endcode
+
+The keyword "testall" can be read as a string in your test main program. You can add
+now the following lines at the very beginning of your test main program to read 
+the argument:
+\code
+  int main(int argc, char* argv[])
+  {
+   bool testall = false;
+   if (argv[1])
+    testall = (std::string(argv[1]).compare("testall") == 0);
+   ...
+  }
+\endcode
+
+Of course, you can use another word than "testall", you just have to make sure that
+your test program recognizes it. However, it is recommended to use the same 
+flag for all tests, i.e., testall. <b> Important note: sometimes the command
+has already some arguments (the solver name and/or an input file). In this case,
+pay attention to write the correct number in argv[your_number].</b>
+
+- <b> 4) Finally: </b>
+
+you just have to place one (or several) part(s) of your test in a if(testall)-
+condition to make it run only with "make check_all" and not with "make check":
+\code
+  if(testall)
+  {
+   // your long tests
+  }
+\endcode
+
+You are free to choose and define yourself what is a short and a long version of 
+your test. 
+
+Some (rule of thumb) guidelines:
+	- Avoid to make only a long version of your test. Try to have at least one 
+	short test to run with "make check". For example, take the coarsest grid 
+	 possible, reduce the number of time steps, test only a few combinations of 
+	 parameters instead of all combinations...etc
+	- A reasonable time for one short test is less than 3 seconds.
+	- Maximum should be between 5s and 10s. Only very exceptional cases can
+	be more than 10s.
+	- Long tests have no limits in time. They are supposed to test all possible
+	features and combinations of parameters. They are supposed to be 
+	used less often than "make check" to make sure nothing in the program is 
+	broken. For example, after a long series of commits, before pushing to the
+	central repo.
+
+<b> To conclude, here are some important remarks and notes to keep in mind: </b>
+
+\note 1) For some practical examples, see nse2d_test.c++ and tnse3d_test.c++.
+
+\note <b>2) Launching "make check_all" in Debug mode will be excessively long. It is 
+recommended to "make check_all" in Release mode (sometimes also called Opti).</b>
+
+\note 3) It is recommended to add complex tests, for example, tests with real
+applications, or with established and/or published results. Any benchmark problem 
+(i.e., flow around cylinder) is welcome now that long tests can be run without 
+being concerned by testing time. 
+
+
+
+\note 4) This "make check_all" is only one method among others to differentiate 
+between short and long tests. There are certainly other, more elegant, ways
+but this is a straightforward one to understand, to implement, and to use.
+
+
+
+*/

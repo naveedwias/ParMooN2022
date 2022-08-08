@@ -1,0 +1,56 @@
+###############################################################################
+# getting information from the repository and write into a file which can be 
+# included during compilation.
+
+set(PARMOON_GIT_REVISION "unknown")
+set(PARMOON_GIT_BRANCH "unknown")
+set(PARMOON_LOCAL_CHANGES "true")
+
+cmake_policy(SET CMP0012 NEW)
+if(@Git_FOUND@ AND IS_DIRECTORY @CMAKE_SOURCE_DIR@/.git)
+  # find the revision number
+  execute_process(COMMAND @GIT_EXECUTABLE@ rev-parse HEAD
+                  WORKING_DIRECTORY @CMAKE_SOURCE_DIR@
+                  OUTPUT_VARIABLE _info
+                  RESULT_VARIABLE _result
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(${_result} EQUAL 0)
+    set(PARMOON_GIT_REVISION ${_info})
+  endif()
+  
+  # find out if there are local changes
+  execute_process(COMMAND @GIT_EXECUTABLE@ diff-index --quiet HEAD
+                  WORKING_DIRECTORY @CMAKE_SOURCE_DIR@
+                  OUTPUT_QUIET
+                  RESULT_VARIABLE _result
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(${_result} EQUAL 0)
+    set(PARMOON_LOCAL_CHANGES "false")
+  else()
+    set(PARMOON_LOCAL_CHANGES "true")
+  endif()
+  
+  # find the branch name
+  execute_process(COMMAND @GIT_EXECUTABLE@ branch --show-current
+                  WORKING_DIRECTORY @CMAKE_SOURCE_DIR@
+                  OUTPUT_VARIABLE _info
+                  RESULT_VARIABLE _result
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(${_result} EQUAL 0)
+    set(PARMOON_GIT_BRANCH ${_info})
+  endif()
+endif()
+
+# Since this script is called before any build process, we want to make sure 
+# that no compilation or even linking is necessary if there are no changes.
+# Therefore we can not override the respective file every time (which would 
+# change its time stamp), but only if it is different from the existing one. 
+# This is why we use the temporary file here together with 'copy_if_different'.
+configure_file(@CMAKE_SOURCE_DIR@/cmake/ParMooN_repository_info.cpp.in
+               @PARMOON_CONFIG_DIR@/ParMooN_repository_info_tmp.cpp
+               @ONLY)
+execute_process(COMMAND @CMAKE_COMMAND@ -E copy_if_different
+                @PARMOON_CONFIG_DIR@/ParMooN_repository_info_tmp.cpp
+                @PARMOON_CONFIG_DIR@/ParMooN_repository_info.cpp)
+execute_process(COMMAND @CMAKE_COMMAND@ -E remove
+                @PARMOON_CONFIG_DIR@/ParMooN_repository_info_tmp.cpp)

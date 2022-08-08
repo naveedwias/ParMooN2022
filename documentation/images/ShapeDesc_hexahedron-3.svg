@@ -1,0 +1,195 @@
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="430.19499pt" height="421.24533pt" viewBox="-134.30692 -142.63573 430.19499 421.24533 "> 
+  <g transform="translate(0, 278.6096 ) scale(1,-1) translate(0,142.63573 )" stroke="black" fill="black" stroke-width="0.4pt">
+    <!-- Draw faces via drawing edges -->
+    <!-- 0th rectangle -->
+    <line x1=" 0.0" y1="-128.03647" x2="102.42917" y2="-128.03647  "/>
+    <line x1=" 102.42917" y1="-128.03647" x2="161.58116" y2="-68.88448  "/>
+    <g stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt">
+      <line x1=" 161.58116" y1="-68.88448" x2="59.152" y2="-68.88448  "/>
+      <line x1=" 59.152" y1="-68.88448" x2="0.0" y2="-128.03647  "/>
+    </g>
+    <!-- 1st rectangle -->
+    <line x1=" -39.43466" y1="-39.43466" x2="62.9945" y2="-39.43466  "/>
+    <line x1=" -39.43466" y1="-39.43466" x2="-39.43466" y2="37.38722  "/>
+    <line x1=" -39.43466" y1="37.38722" x2="62.9945" y2="37.38722  "/>
+    <line x1=" 62.9945" y1="-39.43466" x2="62.9945" y2="37.38722  "/>
+    <!-- 2nd rectangle -->
+    <line x1=" 230.46564" y1="0.0" x2="230.46564" y2="76.82188  "/>
+    <line x1=" 289.61763" y1="59.152" x2="289.61763" y2="135.97388  "/>
+    <line x1=" 230.46564" y1="76.82188" x2="289.61763" y2="135.97388  "/>
+    <line x1=" 230.46564" y1="0.0" x2="289.61763" y2="59.152  "/>
+    <!-- 3rd rectangle -->
+    <line x1=" 201.01582" y1="98.58665" x2="201.01582" y2="175.40854  "/>
+    <line x1=" 201.01582" y1="175.40854" x2="98.58665" y2="175.40854  "/>
+    <g stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt">
+      <line x1=" 98.58665" y1="98.58665" x2="98.58665" y2="175.40854  "/>
+      <line x1=" 201.01582" y1="98.58665" x2="98.58665" y2="98.58665  "/>
+    </g>
+    <!-- 4th rectangle -->
+    <line x1=" -68.88448" y1="135.97388" x2="-128.03647" y2="76.82188  "/>
+    <line x1=" -128.03647" y1="0.0" x2="-128.03647" y2="76.82188  "/>
+    <g stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt">
+      <line x1=" -68.88448" y1="59.152" x2="-68.88448" y2="135.97388  "/>
+      <line x1=" -68.88448" y1="59.152" x2="-128.03647" y2="0.0  "/>
+    </g>
+    <!-- 5th rectangle -->
+    <line x1=" 0.0" y1="204.85835" x2="102.42917" y2="204.85835  "/>
+    <line x1=" 102.42917" y1="204.85835" x2="161.58116" y2="264.01035  "/>
+    <line x1=" 161.58116" y1="264.01035" x2="59.152" y2="264.01035  "/>
+    <line x1=" 59.152" y1="264.01035" x2="0.0" y2="204.85835  "/>
+    <!-- Draw circles in vertices -->
+    <!-- 0th rectangle -->
+    <g fill = "black" stroke-width="0pt">
+      <circle cx=" 0.0" cy="-128.03647" r="1.2"/>
+      <circle cx=" 102.42917" cy="-128.03647" r="1.2"/>
+      <circle cx=" 161.58116" cy="-68.88448" r="1.2"/>
+      <circle cx=" 59.152" cy="-68.88448" r="1.2"/>
+      <!-- 1st rectangle -->
+      <circle cx=" -39.43466" cy="-39.43466" r="1.2"/>
+      <circle cx=" 62.9945" cy="-39.43466" r="1.2"/>
+      <circle cx=" -39.43466" cy="37.38722" r="1.2"/>
+      <circle cx=" 62.9945" cy="37.38722" r="1.2"/>
+      <!-- 2nd rectangle -->
+      <circle cx=" 230.46564" cy="0.0" r="1.2"/>
+      <circle cx=" 289.61763" cy="59.152" r="1.2"/>
+      <circle cx=" 230.46564" cy="76.82188" r="1.2"/>
+      <circle cx=" 289.61763" cy="135.97388" r="1.2"/>
+      <!-- 3rd rectangle -->
+      <circle cx=" 201.01582" cy="175.40854" r="1.2"/>
+      <circle cx=" 201.01582" cy="98.58665" r="1.2"/>
+      <circle cx=" 98.58665" cy="98.58665" r="1.2"/>
+      <circle cx=" 98.58665" cy="175.40854" r="1.2"/>
+      <!-- 4th rectangle -->
+      <circle cx=" -68.88448" cy="135.97388" r="1.2"/>
+      <circle cx=" -128.03647" cy="76.82188" r="1.2"/>
+      <circle cx=" -68.88448" cy="59.152" r="1.2"/>
+      <circle cx=" -128.03647" cy="0.0" r="1.2"/>
+      <!-- 5th rectangle -->
+      <circle cx=" 0.0" cy="204.85835" r="1.2"/>
+      <circle cx=" 102.42917" cy="204.85835" r="1.2"/>
+      <circle cx=" 161.58116" cy="264.01035" r="1.2"/>
+      <circle cx=" 59.152" cy="264.01035" r="1.2"/>
+    </g>
+    <!-- Vertex numbers -->
+    <!-- 0th rectangle -->
+    <g style="stroke:none" text-anchor="middle"  font-family="cmr" font-size="12">
+      <g transform="matrix(1.0,0.0,0.0,1.0,-2.93747,-139.30275) scale(1,-1) translate(2.93747,0)">
+        <text>0</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,99.4917,-139.30275) scale(1,-1) translate(2.93747,0)">
+        <text >1</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,158.64369,-80.15076) scale(1,-1) translate(2.93747,0)">
+        <text >2</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,56.21452,-80.15076) scale(1,-1) translate(2.93747,0)">
+        <text >3</text>
+      </g>
+      <!-- 1st rectangle -->
+      <g transform="matrix(1.0,0.0,0.0,1.0,-42.37213,-50.70094) scale(1,-1) translate(2.93747,0)">
+        <text >0</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,60.05704,-50.70094) scale(1,-1) translate(2.93747,0)">
+        <text >1</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-42.37213,40.9202) scale(1,-1) translate(2.93747,0)">
+        <text >4</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,60.05704,40.9202) scale(1,-1) translate(2.93747,0)">
+        <text >5</text>
+      </g>
+      <!-- 2nd rectangle -->
+      <g transform="matrix(1.0,0.0,0.0,1.0,227.52817,-11.26628) scale(1,-1) translate(2.93747,0)">
+        <text >1</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,286.68016,47.88571) scale(1,-1) translate(2.93747,0)">
+        <text >2</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,227.52817,80.35486) scale(1,-1) translate(2.93747,0)">
+        <text >5</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,286.68016,139.50685) scale(1,-1) translate(2.93747,0)">
+        <text >6</text>
+      </g>
+      <!-- 3rd rectangle -->
+      <g transform="matrix(1.0,0.0,0.0,1.0,198.07835,87.32037) scale(1,-1) translate(2.93747,0)">
+        <text >2</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,95.64919,87.32037) scale(1,-1) translate(2.93747,0)">
+        <text >3</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,198.07835,178.94151) scale(1,-1) translate(2.93747,0)">
+        <text >6</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,95.64919,178.94151) scale(1,-1) translate(2.93747,0)">
+        <text >7</text>
+      </g>
+      <!-- 4th rectangle -->
+      <g transform="matrix(1.0,0.0,0.0,1.0,-130.97394,-11.26628) scale(1,-1) translate(2.93747,0)">
+        <text >0</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-71.82195,47.88571) scale(1,-1) translate(2.93747,0)">
+        <text >3</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-130.97394,80.35486) scale(1,-1) translate(2.93747,0)">
+        <text >4</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-71.82195,139.50685) scale(1,-1) translate(2.93747,0)">
+        <text >7</text>
+      </g>
+      <!-- 5th rectangle -->
+      <g transform="matrix(1.0,0.0,0.0,1.0,-2.93747,208.39133) scale(1,-1) translate(2.93747,0)">
+        <text >4</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,99.4917,208.39133) scale(1,-1) translate(2.93747,0)">
+        <text >5</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,158.64369,267.54332) scale(1,-1) translate(2.93747,0)">
+        <text >6</text>
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,56.21452,267.54332) scale(1,-1) translate(2.93747,0)">
+        <text >7</text>
+      </g>
+    </g>
+
+    <!-- Middle lines between opposite rectangles -->
+    <g stroke-dasharray="3.0pt,4.0pt,0.4pt,4.0pt,0.4pt,4.0pt" stroke-dashoffset="0.0pt">
+      <line x1=" 80.79057" y1="234.43434" x2="80.79057" y2="-98.46046  " />
+      <line x1=" -98.46046" y1="67.98692" x2="260.04163" y2="67.98692  " />
+      <line x1=" 11.77992" y1="-1.02373" x2="149.80122" y2="136.99759  " />
+    </g>
+
+    <!-- Face numbers and surrounding rectangles -->
+    <g style="stroke:none" text-anchor="middle"  font-family="cmr" font-size="12">
+      <path d=" M  64.11926 -104.32712 L  75.8531 -92.59381 L  97.46188 -92.59381 L  85.72804 -104.32712 Z  " style="fill:none; stroke:black;"/>
+      <g transform="matrix(1.0,0.0,0.0,1.0,77.8531,-102.32712) scale(1,-1) translate(2.93747,0)">
+          <text >0</text> 
+      </g>
+
+      <path d=" M  5.50948 -8.22336 h  12.5409 v  14.39926 h  -12.5409 Z  " style="fill:white; stroke:black;" />
+      <g transform="matrix(1.0,0.0,0.0,1.0,8.84245,-4.89038) scale(1,-1) translate(2.93747,0)">
+          <text >1</text> 
+      </g>
+
+      <path d=" M  252.30797 52.51997 L  252.30832 67.98694 L  267.77528 83.4539 L  267.77493 67.98694 Z  " style="fill:white; stroke:black;"/>
+      <g transform="matrix(1.0,0.0,0.0,1.0,257.10416,64.12029) scale(1,-1) translate(2.93747,0)">
+        <text >2</text> 
+      </g>
+
+      <path d=" M  143.53078 129.79796 h  12.5409 v  14.39926 h  -12.5409 Z  " style="fill:none; stroke:black;"/>
+      <g transform="matrix(1.0,0.0,0.0,1.0,146.86375,133.13094) scale(1,-1) translate(2.93747,0)">
+          <text >3</text> 
+      </g>
+
+      <path d=" M  -106.19412 52.51997 L  -106.19377 67.98694 L  -90.7268 83.4539 L  -90.72716 67.98694 Z  " style="fill:none; stroke:black;"/>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-101.39793,64.12029) scale(1,-1) translate(2.93747,0)">
+        <text >4</text> 
+      </g>
+
+      <path d=" M  64.11926 228.56769 L  75.8531 240.301 L  97.46188 240.301 L  85.72804 228.56769 Z  " style="fill:white; stroke:black;"/>
+      <g transform="matrix(1.0,0.0,0.0,1.0,77.8531,230.56769) scale(1,-1) translate(2.93747,0)">
+        <text >5</text> 
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,251 @@
+# The name of the database. This is usually not of any importance
+[ ParMooN database for CD2D ]
+
+## This is the file where all output of ParMooN is (usually) written 
+## to. In general ParMooN produces text output on the console as well 
+## as in this file. For this to properly work, you should call 
+## `Output::set_outfile(db["outfile"]);` in your main program. 
+outfile: default_parmoon_outfile.out
+
+## This is a file describing the boundary of the computational 
+## domain. You probably want to adjust this to be the path to some file 
+## which typically has the extension 'PRM'. See the documentation 
+## for GEO and PRM files. 
+boundary_file: Default_UnitSquare
+
+## This files describes the computational mesh. You probably want to 
+## adjust this to be the path to some file which typically has the 
+## extension 'GEO' or 'xGEO'. See the documentation for GEO and PRM 
+## files. 
+geo_file: UnitSquare   { TwoTriangles, UnitSquare }
+
+## number of uniform refinements of the initial mesh
+refinement_n_initial_steps: 5
+
+## Determine which kind of problem you want to solve. A value of 0 means 
+## not set. Other values have the following meanings: 1: stationary 
+## convection-diffusion, 2: time-dependent 
+## convection-diffusion, 3: stationary Stokes, 4: time-dependent 
+## Stokes, 5: stationary Navier-Stokes, 6: time-dependent 
+## Navier-Stokes. 
+problem_type: 1   [ 0, 6 ]
+
+## Set the verbosity of ParMooN. The higher the number, the more will 
+## output you will get. Such output will be written to console and the 
+## 'outfile'. 
+verbosity: 1   [ 1, 5 ]
+
+## Choose which example to run. Note that depending on the type of 
+## problem you want to solve, different values are meaningful here. 
+## See the class 'Example' and its derived classes.
+## 0 - sine laplace (on unit square)
+## 1 - two interior layers (on unit square)
+## 2 - Hemker 1996 (on rectangle with a hole)
+example: 0   [ -5, 200 ]
+
+## This parameter can control, whether an output methodof a system 
+## class will produce VTK output or not. 
+output_write_vtk: false   { true, false }
+
+## Draw a postscript file of the domain. This only works in two space 
+## dimensions. Usually this is used in the main program. 
+output_write_ps: false   { true, false }
+
+## Do or do not compute errors after computing a solution. This makes 
+## much sense if an analytical solution is known. If not then it is 
+## often simply set to zero and computing errors then means computing 
+## norms, e.g. the L^2-norm of the solution. 
+output_compute_errors: true   { true, false }
+
+## This directory is where the VTK output is written. This directory 
+## will be created, if it does not exist already. Files in this 
+## directory will be overwritten without any warning. 
+output_directory: . 
+
+## This string is prepended to most files written by ParMooN. 
+## Especially this includes vtk-files 
+output_basename: parmoon
+
+## Determine which kind of solver should be used. This can be an 
+## iterative or a direct solver 
+solver_type: direct   { direct, iterative }
+
+## Determine which type of direct solver should be used. All of them 
+## are implemented in external libraries. 
+direct_solver_type: umfpack   { mumps, pardiso, umfpack }
+
+## Determine which type of iterative solver should be used.
+iterative_solver_type: fgmres   { bi_cgstab, cg, cgs, fgmres, jacobi, left_gmres, richardson, right_gmres, sor, ssor }
+
+## Maximum number of iterations of the iterative solver. This is used 
+## as a stopping criterion of the iteration. 
+max_n_iterations: 100   { 0, 1, 2, 3, 4, 5, 10, 100, 1000, 10000, 100000 }
+
+## Minimum number of iterations of the iterative solver. This 
+## enforces iterations even of other stopping criteria are already 
+## satisfied. 
+min_n_iterations: 0   { 0, 1, 2, 3, 4, 5, 10 }
+
+## The desired accuracy for the residual using an iterative solver. 
+## This is used as a stopping criterion of the iteration. 
+residual_tolerance: 1e-08   [ 0, 100 ]
+
+## The factor by which the residual should be reduced. This is used as a 
+## stopping criterion. Whenever the residual is smaller than the 
+## product of the initial residual and this parameter, the iteration 
+## is terminated. A value of 0.0 therefore effectively disables this 
+## stopping criterion. 
+residual_reduction: 0   [ 0, 1 ]
+
+## The number of gmres iterations until a restart is done. Larger 
+## numbers lead to more memory consumption, smaller numbers 
+## typically mean more iterations. 
+gmres_restart: 20   [ 1, 1000 ]
+
+## Determine the used preconditioner. Note that some of these are 
+## specific for some problem types. 
+preconditioner: no_preconditioner   { gauss_seidel, jacobi, multigrid, no_preconditioner }
+
+## The damping in an iteration. A value of 1.0 means no damping while 
+## 0.0 would mean no progress. In general smaller values make 
+## iterations slower. This can still be necessary in cases where the 
+## iterations does not converge at all with larger values. 
+damping_factor: 1   [ 0, 1 ]
+
+## Determine how many levels the multigrid cycle consists of. 
+multigrid_n_levels: 2   [ 0, 5 ]
+
+## The damping of an iteration in case of a multigrid preconditioner. 
+## This only affects the update on the finest grid. 
+damping_factor_finest_grid: 1   [ 0, 1 ]
+
+## The recursion type how to traverse the multigrid levels.So far the 
+## three standard cycle V, W and F are implemented. 
+multigrid_cycle_type: V   { F, V, W }
+
+## The smoother to use on all but the coarsest level.You should take 
+## care, that the smoother you chose fitsyour problem type, e.g. 
+## Vanka smoothers are best fittedfor saddle point problems. 
+multigrid_smoother: jacobi   { jacobi, no_smoother}
+
+## The smoother to use on the coarsest level.You should take care, 
+## that the smoother you chose fitsyour problem type, e.g. Vanka 
+## smoothers are best fittedfor saddle point problems. 
+multigrid_smoother_coarse: direct_solve   { direct_solve, jacobi, no_smoother }
+
+## The damping factor which is used when applying the coarsegrid 
+## correction to a finer grid. A factor of 1.0 means:no damping, a 
+## factor of 0.0: nothing changes. 
+multigrid_correction_damp_factor: 1   [ 0, 1 ]
+
+## The number of smoothing steps to apply per levelbefore going down 
+## to the next coarsest level. 
+multigrid_n_pre_smooth: 1   [ 1, 10 ]
+
+## The number of smoothing steps to apply per levelafter coming up 
+## from the next coarsest level. 
+multigrid_n_post_smooth: 1   [ 1, 10 ]
+
+## The target residual on the coarsest grid.When this residual is 
+## reached on the coarsest grid by solving or smoothing, the coarse 
+## level will return and the processcontinue on the next finest 
+## level. 
+multigrid_coarse_residual: 0.1   [ 0, 1 ]
+
+## The maximal number of solver/smoother iterations to be performed 
+## whenever working on the coarsest level. 
+multigrid_coarse_max_n_iterations: 10   [ 1, 100 ]
+
+## A damping factor relevant for Vanka type smoothers only. It is 
+## responsible for a damping when adding the solution of the local 
+## defect equation onto the global solution. Vanka smoothers tend to 
+## be quite responsive to this value. Although it defaults to 1.0 (no 
+## damping), a value of 0.8 is often a good start. 
+multigrid_vanka_damp_factor: 1   [ 0, 1 ]
+
+----------------------------------------------------------------------
+# control the discretization
+
+# Peclet number eps=1/PE_NR (diffusion coefficient)
+diffusion_coefficient:  1.e-1
+
+# order of ansatz space (=k)
+#   i.e. P_k on triangles
+#        Q_k on quadrangles
+ANSATZ_ORDER: 1
+
+# type of discretization: 
+#   1 - GALERKIN
+#   2 - SDFEM/SUPG (streamline diffusion FEM/ streamline upwind Petrov-Galerkin)
+#   3 - UPWIND (unsupported)
+#   4 - CIP (continuous interior penalty)
+#   5 - DG (discontinuous Galerkin)
+#   6 - GLS (Galerkin least squares)
+#  14 - LPS (local projection stabilization)
+DISCTYPE: 1
+
+----------------------------------------------------------------------
+
+# change how the SUPG parameter is computed
+SDFEM_TYPE: 0
+
+# factors for SDFEM (delta_K=h_K*DELTAi)
+#   DELTA0 for high Peclet number
+#   DELTA1 for low Peclet number
+DELTA0:  0.3
+DELTA1:  0.0
+
+# LPS, stabilization parameters
+# choose ANSATZ_ORDER 100, 201, 302, 403, 504,... 
+LP_FULL_GRADIENT: 1
+LP_FULL_GRADIENT_COEFF: 0.5
+LP_FULL_GRADIENT_EXPONENT: 1
+LP_FULL_GRADIENT_ORDER_DIFFERENCE: 1
+
+LP_STREAMLINE: 0
+LP_STREAMLINE_COEFF: 0.1
+LP_STREAMLINE_EXPONENT: 1
+LP_STREAMLINE_ORDER_DIFFERENCE: 1
+
+----------------------------------------------------------------------
+# controling adaptive refinement
+
+# strategy for choosing cells for reﬁnement and dereﬁnement
+#  0 - compare to the maximal estimated local error
+#  1 - find set of cells whose sum of estimated local errors is a 
+#      prescribed part of the estimated global error, the cells in this 
+#      set are reﬁned
+# default: 0
+REFINE_STRATEGY: 0
+
+# tolerance for refinement in [0,1], default: 0.5
+# larger values mean fewer refined cells, zero means global uniform refinement
+# if you set large values, that value will internally be decreased such that a
+# minimum number of cells are refined. This avoids the case where only very few 
+# cells are refined.
+REFTOL: 0.5
+
+# we only adaptively refine the cells, if the fraction of the cells to be 
+# refined over the total number of cells is larger than the following factor.
+# Smaller values mean that during one refinement step possibly only few cells
+# are indeed refined. (default: 0.25)
+MIN_FRACTION_TO_CHANGE: 0.25
+
+# if the program could not find enough cells to be refined (determined by
+# MIN_FRACTION_TO_CHANGE), the tolerance (see REFTOL) is decreased by the 
+# following factor. Larger values mean fewer cells refined.
+DECREASE_REFTOL_FACTOR: 0.8
+
+# determine local error estimtor/indicator (see documentation)
+#   0 - gradient indicator
+#   1 - residual estimator H1
+#   2 - residual estimator L2
+#   3 - residual estimator energy quasi robust     (default)
+ADAPTIVE_REFINEMENT_CRITERION: 3
+
+
+
+# INPUT_QUAD_RULE is used to determine the quadrature formula during 
+# the computation of errors. Set it to 99 (or so) to get the highest 
+# order quadrature formula available
+INPUT_QUAD_RULE: 99

@@ -1,0 +1,96 @@
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="185pt" height="165.1724pt" viewBox="-13.5 -14.59926 185 165.1724 "> 
+  <g transform="translate(0,135.97388) scale(1,-1)" stroke="black" fill="black" stroke-width="0.5pt">
+    <!-- Draw lines for edges -->
+    <line x1="0.0" y1="0.0" x2="102.42917" y2="0.0"/>
+    <line x1="102.42917" y1="0.0" x2="161.58116" y2="59.152"/>
+    <line x1="0.0" y1="0.0" x2="0.0" y2="76.82188"/>
+    <line x1="161.58116" y1="59.152" x2="161.58116" y2="135.97388"/>
+    <line x1="102.42917" y1="0.0" x2="102.42917" y2="76.82188"/>
+    <line x1="0.0" y1="76.82188" x2="102.42917" y2="76.82188"/>
+    <line x1="102.42917" y1="76.82188" x2="161.58116" y2="135.97388"/>
+    <line x1="161.58116" y1="135.97388" x2="59.152" y2="135.97388"/>
+    <line x1="59.152" y1="135.97388" x2="0.0" y2="76.82188"/>
+    <g stroke-dasharray="3.0pt,3.0pt" stroke-dashoffset="0.0pt" style="fill:none">
+      <line x1="161.58116" y1="59.152" x2="59.152" y2="59.152"/>
+      <line x1="59.152" y1="59.152" x2="0.0" y2="0.0"/>
+      <line x1="59.152" y1="59.152" x2="59.152" y2="135.97388"/>
+    </g>
+    <!-- Draw circles in vertices -->
+    <g fill = "black" stroke-width="0pt">
+      <circle cx="0" cy="0" r="1.2"/>
+      <circle cx="161.58116" cy="59.152" r="1.2"/>
+      <circle cx="0" cy="76.82188" r="1.2"/>
+      <circle cx="161.58116" cy="135.97388" r="1.2"/>
+      <circle cx="102.42917" cy="0" r="1.2"/>
+      <circle cx="59.152" cy="59.152" r="1.2"/>
+      <circle cx="102.42917" cy="76.82188" r="1.2"/>
+      <circle cx="59.152" cy="135.97388" r="1.2"/>
+    </g>
+    <!-- Draw node numbers -->
+    <g style="stroke:none" text-anchor="middle" font-family="cmr" font-size="12">
+      <g transform="matrix(1.0,0.0,0.0,1.0,-2.93747,-11.26628)">
+        <text transform="scale(1,-1) translate(2.93747,0)">0</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,99.4917,-11.26628)">
+        <text transform="scale(1,-1) translate(2.93747,0)">1</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,158.64369,47.88571)">
+        <text transform="scale(1,-1) translate(2.93747,0)">2</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,56.21452,47.88571)">
+        <text transform="scale(1,-1) translate(2.93747,0)">3</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-2.93747,80.35486)">
+        <text transform="scale(1,-1) translate(2.93747,0)">4</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,99.4917,80.35486)">
+        <text transform="scale(1,-1) translate(2.93747,0)">5</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,158.64369,139.50685)">
+        <text transform="scale(1,-1) translate(2.93747,0)">6</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,56.21452,139.50685)">
+        <text transform="scale(1,-1) translate(2.93747,0)">7</text> 
+      </g>
+    </g>
+    <!-- Draw edge numbers -->
+    <g stroke="blue" fill="blue" style="stroke:none" text-anchor="middle" font-family="cmbx" font-size="12">
+      <g transform="matrix(1.0,0.0,0.0,1.0,47.83958,-11.26628)">
+        <text transform="scale(1,-1) translate(3.375,0)">0</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,135.53813,25.70934)">
+        <text transform="scale(1,-1) translate(3.375,0)">1</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,106.99156,62.68495)">
+        <text transform="scale(1,-1) translate(3.375,0)">2</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,26.20099,33.10896)">
+        <text transform="scale(1,-1) translate(3.375,0)">3</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,-10.28297,34.54428)">
+        <text transform="scale(1,-1) translate(3.375,0)">4</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,105.96214,34.54428)">
+        <text transform="scale(1,-1) translate(3.375,0)">5</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,165.11412,93.69627)">
+        <text transform="scale(1,-1) translate(3.375,0)">6</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,48.869,93.69627)">
+        <text transform="scale(1,-1) translate(3.375,0)">7</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,47.83958,65.55559)">
+        <text transform="scale(1,-1) translate(3.375,0)">8</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,135.53813,95.13159)">
+        <text transform="scale(1,-1) translate(3.375,0)">9</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,103.61656,139.50685)">
+        <text transform="scale(1,-1) translate(6.75,0)">10</text> 
+      </g>
+      <g transform="matrix(1.0,0.0,0.0,1.0,12.54301,109.93085)">
+        <text transform="scale(1,-1) translate(6.75,0)">11</text> 
+      </g>
+    </g>
+  </g>
+</svg>

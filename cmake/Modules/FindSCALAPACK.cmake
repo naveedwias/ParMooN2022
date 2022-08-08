@@ -1,0 +1,37 @@
+# If libraries are already defined, do nothing 
+IF(SCALAPACK_LIBRARIES)
+  SET(SCALAPACK_FOUND TRUE)
+  RETURN()
+ENDIF()
+
+message(STATUS "Finding SCALAPACK")
+
+SET(SCALAPACKLIB 
+  "${SCALAPACKROOT}"
+  "${SCALAPACKROOT}/lib"
+  "$ENV{SCALAPACKROOT}"
+  "$ENV{SCALAPACKROOT}/lib"
+  "$ENV{SCALAPACK_ROOT}"
+  "$ENV{SCALAPACK_ROOT}/lib"
+  "${CMAKE_SOURCE_DIR}/scalapack"
+  "${CMAKE_SOURCE_DIR}/scalapack/lib")
+
+FIND_LIBRARY(SCALAPACK_LIBRARIES
+  NAMES
+  "scalapack" "scalapack-pvm" "scalapack-mpi" "scalapack-mpich" 
+  "scalapack-mpich2" "scalapack-openmpi" "scalapack-lam"
+  HINTS
+  ${SCALAPACKLIB})
+   
+IF (SCALAPACK_FOUND)
+  IF (NOT SCALAPACK_FIND_QUIETLY)
+    MESSAGE(STATUS "A library with SCALAPACK API found.")
+    MESSAGE(STATUS "SCALAPACK libraries: ${SCALAPACK_LIBRARIES}")
+  ENDIF()
+ELSE()
+  IF (SCALAPACK_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "SCALAPACK library not found.")
+  ENDIF()
+ENDIF()
+
+MARK_AS_ADVANCED(SCALAPACK_FOUND SCALAPACK_LIBRARIES SCALAPACKLIB)

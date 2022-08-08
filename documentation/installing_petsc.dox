@@ -1,0 +1,58 @@
+/**
+\page page_installing_petsc Installing \c PETSc
+
+\c ParMooN depends on PETSc in two ways. It manages most external libraries 
+and provides interfaces to more solvers and preconditioners.
+
+\section dowload_petsc Downloading \c PETSc
+Download \c PETSc either from 
+http://www.mcs.anl.gov/petsc/download/index.html or via
+\code{.sh}
+git clone -b maint https://bitbucket.org/petsc/petsc petsc
+cd petsc/
+\endcode
+In general either way should work, but cloning the repository is likely to be 
+easier during an update of \c PETSc.
+
+
+\section config_and_compile_petsc Configuring and compiling \c PETSc
+Invoke the following command from the top level \c PETSc directory: 
+\code{.sh}
+./configure --with-cc=gcc --with-cxx=g++ --with-fc=gfortran --with-debugging=0 COPTFLAGS='-O3 -march=native -mtune=native' CXXOPTFLAGS='-O3 -march=native -mtune=native' FOPTFLAGS='-O3 -march=native -mtune=native' --download-fblaslapack --download-openmpi --download-scalapack --download-mumps --download-metis --download-suitesparse --download-parmetis --download-hdf5 --download-zlib
+\endcode
+
+Note that this downloads and compiles a number of libraries which are used by 
+\c PETSc and also by ParMooN directly. It takes a while. At the end of the 
+output of the configure script it will let you know what you have to do to 
+compile \c PETSc itself. For example
+\code{.sh}
+make PETSC_DIR=/path/to/petsc PETSC_ARCH=arch-linux2-c-opt all
+\endcode
+This will take a little bit of time. Finally you can run the tests. The exact 
+command is printed at the end by the previous one:
+\code{.sh}
+make PETSC_DIR=/path/to/petsc PETSC_ARCH=arch-linux2-c-opt test
+\endcode
+
+
+\subsection alternative_configure_petsc Alternatives during the cofiguration
+The way the configure script was called above all the external libraries and 
+\c PETSc itself are compiled in release mode. If you want to debug this code as 
+well, you should leave out the options
+\code{.sh}
+--with-debugging=0 COPTFLAGS='-O3 -march=native -mtune=native' CXXOPTFLAGS='-O3 -march=native -mtune=native' FOPTFLAGS='-O3 -march=native -mtune=native'
+\endcode
+
+You can choose to configure \c PETSc in many other ways and we can only recommend
+to read its documentation. For example you can choose \e mpich instead of 
+\e openmpi using the option `--download-mpich` instead of `--download-openmpi`.
+Also if you have other versions of some of the needed libraries above, you can 
+tell \c PETSc to use those instead of downloading them.
+
+Possible other interesting flags:
+\code{.sh}
+    --with-mkl_pardiso-lib   --with-mkl_cpardiso-lib
+    --download-ctetgen
+    --download-triangle
+\endcode
+*/

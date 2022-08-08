@@ -1,0 +1,217 @@
+/**
+ \page page_build_system Building ParMooN programs
+ \brief Here we collect some information on the build system
+ 
+ \tableofcontents
+
+//-------------------------------------------------------------------------------------
+ \section preface Preface
+ ParMooN uses cmake as a build system generator. Cmake stands for cross-platform make and aims at maximum portability.\n
+  This page is no replacement for a profound introduction to cmake but rather collects solutions and thoughts on 
+ the use of cmake for ParMooN. For a basic introduction to cmake you could start by googling "cmake".
+
+//-------------------------------------------------------------------------------------
+ \section kdevelopintegration Integrating ParMooN into KDevelop
+ KDevelop allows for an out-of-source build cmake integration, which is very
+ desirable in order to separate the code from all the files created during the
+ build process. The following steps have been tested with KDevelop 4.7.1.
+ 
+ @note Currently I do not know of a nice way to resize the image to some more
+       meaningful size other than scaling each image by hand.
+ 
+ After starting KDevelop create a new project, in the menu bar go to 
+> Project->Open/Import Project
+ \image html KDevelop_create_project1.png
+ which should open a separate window. In there  choose the CMakeLists.txt in
+ your root ParMooN directory and click "Next".
+ \image html KDevelop_create_project2.png
+ Here you can leave everything as it is and click "Finish".
+ \image html KDevelop_create_project3.png
+ Another window will open. This is where you can 
+ choose where your build directory should be at. The build directory is where
+ all output of cmake and make go, this includes all compiled object files and
+ compiled and linked executables (however you can change the path for those if
+ you like).
+ 
+ In this setup it is a sibling directory of the root ParMoon directory. This 
+ way it does not interfere with the version control or the code. Additionaly it
+ is possible to change the build type here, leave as Debug, if you plan to use 
+ the debugger later. Then click "OK". 
+ \image html KDevelop_create_project4.png
+ This is it. Try to compile one of the targets. 
+ \image html KDevelop_create_project5.png
+ 
+ If this did not work out for you, contact one of the developers, for example 
+ Ulrich. The way this is set up here KDevelop creates a file called 
+ "ParMooN.kdev4" and a directory ".kdev4" in the root ParMooN directory which
+ is not desirable. Currently we can not avoid this. These files are added to 
+ the .gitignore file in order to not interfere too much with the version control.
+
+
+//-------------------------------------------------------------------------------------
+ \section Xcodeintegration Integrating ParMooN into Xcode
+
+ Xcode is a develeopment environment for Mac OS X.
+ The following steps are based on an out-of-source build and have been tested for
+ Xcode Version 7.2 (7C68).
+
+ The first step is to create a new folder which is going to contain all the build
+ related stuff corresponding to Xcode (e.g., "Build_XCode") and switch into that directory.
+ Therefore use the commands
+ 
+ \Note This section has been written with a now removed Brinkman code as an
+ example, the general procedure should still work.
+
+ \code
+ mkdir Build_Xcode
+ cd Build_Xcode
+ \endcode
+
+ Now cmake is used to generate the build files in the current folder ("Build_Xcode") via
+
+ \code
+ cmake -G Xcode ../ParMooN
+ \endcode
+
+ where the path, here "../ParMooN", points into the directory that contains the entire
+ ParMooN code under git version control.
+
+ Next, start Xcode and choose the option "Open another Product".
+ \image html Xcode1.png
+ Here, in Xcode one can interpret "product" as "project".
+ The file which has to be chosen is in the folder "Build_Xcode" and has the ending ".xcodeproj".
+
+ In order to use the build and run option Xcode supplies, you first have to chose a scheme
+ and, in case your program needs one, hand in an input/data file.
+ In the header corresponding to Xcode chose the feature "Product --> Scheme".
+ \image html Xcode2.png
+ Here, the desired scheme, e.g., "brinkman2d" should be marked and one should edit the scheme via "Edit Scheme..."
+ \image html Xcode3.png
+ option as follows:
+ \image html Xcode4.png
+ At "Run --> Info" the "Executable" should be chosen, e.g., "parMooN_brinkman2d_SEQUENTIAL".
+ At "Run --> Arguments" one has to add the input file, e.g. brinkman2d.dat.
+ As "Argument Passed On Launch", "Executable" should be chosen, e.g., "parMooN_brinkman2d_SEQUENTIAL".
+ Make sure that at "Run --> Options" the "Working Directory" is "costum" and the path is the right one,
+ e.g., /Users/blank/ParMooN/Tests/Brinkman2D.
+
+ That's it!
+
+
+//-------------------------------------------------------------------------------------
+ \section presetvariables Changing build variables
+ 
+ \subsection idealbuildprocess An ideal cmake build process
+ There is an ideal on how building a project with cmake should work. That is
+    - run cmake and let it figure out all variables automatically
+    - change whatever you don't like manually in the CMakeCache.txt
+    - run cmake a second time \n
+ From there onwards you should not ever have to call cmake again. Instead cmake notices
+ whenever anything in your project changes and performs all further needed changes accordingly
+ as soon as you build a target.\n
+ Getting the build system working like this is our definite aim.
+ 
+ \subsection buildvariables Three ways to change build variables
+ In CMake there are several ways how build variables can be set.
+ 
+    - (1) hard code them into the CMakeLists.txt
+    - (2) hand them as arguments to the cmake call with the -D option
+    - (3) change them in the Cache
+ 
+ Option (1) should be avoided whenever possible, for it kills the "c" (cross-platform) in cmake.\n
+ Option (2) is okay, but it looks somehow old-schoolish and complicated and it does not go along well with 
+ the desired cmake-process presented above. \n
+ So option (3) is definitely first choice, and we should aim at using it whenever possible.\n
+ Problem is: with some variables it seems to be not that easy, those have to be set in advance. Please read on.
+
+  \subsection troublesomethree The troublesome three
+  There are some variables which we might want to change from time to time but which cannot so easily done in the cache.
+  
+  \remarks This section shows just my current state of knowledge, some of the issues might need deeper investigation.
+  
+  \subsubsection compilers The compilers
+  It seems like the compiler(s) for C,CXX and Fortran must be chosen before the project command is performed for the first time.
+  Cmake does not like it if we change either of the used compilers CMAKE_C_COMPILER, CMAKE_CXX_COMPILER or CMAKE_Fortran_COMPILER in the cache.
+  
+  So to be in control of the chosen compilers we have to set them in advance, using option (2).
+  To choose e.g. the G95 Fortran compiler (on my machine under /usr/bin/g95 ) I would replace my standard cmake call
+  \code
+  cmake ..
+  \endcode
+  with
+  \code
+  cmake -D CMAKE_Fortran_COMPILER=/usr/bin/g95 ..
+  \endcode
+  
+  I would not recommend to select any mpi compiler wrapper here. To deal with the 
+  requirements of mpi compilation and linking we use the FindMPI package. Setting
+  a compiler wrapper here is untested and might lead to trouble. \n
+  If one does not specify compilers in the first call to cmake, the program will figure out automatic values.
+  If you don't like these, rebuild the project, this time specifying the compilers in advance as described above.
+  
+
+  
+  \subsubsection buildtype The build type
+  Cmake supports four different build types, all of which characterized by a slightly different set of compiler and linker options,
+  which cmake determines automatically and which can be modified by the user in the cache. There are four different build types
+    - Debug   
+    - Release
+    - RelWithDebInfo
+    - MinSizeRel
+  
+  The most important for us are probably Debug and Release.\n
+  Switching between these can be done by modifying the value of CMAKE_BUILD_TYPE in the cache:
+  
+  > //Choose the type of build, options are: None(CMAKE_CXX_FLAGS or \n
+  > // CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel. \n
+  > CMAKE_BUILD_TYPE:STRING=Debug
+  
+  but I am not entirely sure how well this works out. It is probably safer to force the build type into the cache when running cmake the first time. 
+  If your usual cmake call looks like this (this would be a standard out-of-source build from a subdirectory "build")
+  \code
+  cmake ..
+  \endcode
+  then replace it by
+  \code
+  cmake -D CMAKE_BUILD_TYPE=Debug ..
+  \endcode
+  and keep a separate build directory for the Release build.
+  \remarks
+  If anybody gathers some experience on switching between build types by option (3), please share it.
+
+  
+  \subsubsection paralleltype The parallel type
+  Okay, this one actually is no trouble at all. The cmake system is set up in such a way, that you can change the
+  parallel type in the cache at any time. Just find the lines
+  > //The used parallelism. Choose between MPI, OMPONLY, HYBRID and \n
+  > // SEQUENTIAL. \n
+  > PARMOON_PARALLEL_TYPE:STRING=SEQUENTIAL \n
+  in your cmake-generated file CMakeCache.txt and change the parallel type to your heart's content whenever you want.\n
+  Cmake will perform all necessary changes the next time you compile a target.\n
+  Of course if you want a certain parallel type on from your very first call to cmake, you have to force the variable into the cache
+  by employing option (2). If your usual out-of-source build is initialized by
+  \code
+  cmake ..
+  \endcode
+  then what you type now is (assuming you want an MPI build right from the beginning)
+  \code
+  cmake -D PARMOON_PARALLEL_TYPE=MPI ..
+  \endcode
+  \remarks Just that you switched to MPI does not mean your programs are running in parallel now. There is still a lot
+  of work ahead of us...
+  
+  \subsection conclusion Conclusion
+  If you expect that you do not like the automatic values for compilers, buildtype and parallel type, force your own choice into the cache when calling cmake for the first time.
+  For example: if you want to use the clang compiler for C++ and C (on my machine the executables are to be found under /usr/bin/clang++ and /usr/bin/clang), go for a debug build and want to use OMPONLY as parallel type, you replace your standard cmake call, e.g.
+  \code
+  cmake ..
+  \endcode
+  by 
+  \code
+   cmake -D CMAKE_CXX_COMPILER=/usr/bin/clang++ -D CMAKE_C_COMPILER=/usr/bin/clang -D CMAKE_BUILD_TYPE=Debug -D PARMOON_PARALLEL_TYPE=OMPONLY ..
+  \endcode
+  If you want to change any of the troublesome three, then
+    - for the compilers: set up a new build and use option (2)
+    - for the build type: experiment with changing the value in the cache, but to be on the safe side set up a new build and use option (2)
+    - for the parallel type: just change the value of PARMOON_PARALLEL_TYPE in the cache (option (3) )
+*/

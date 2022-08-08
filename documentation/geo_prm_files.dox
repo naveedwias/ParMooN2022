@@ -1,0 +1,273 @@
+/**
+ * \page page_geo_prm_specification What are '.GEO' and '.PRM' files?
+ *
+ * \brief Description of the file formats used to read meshes in ParMooN.
+ *
+ * \tableofcontents
+ * 
+ * Here we try to exactly describe which format the GEO and PRM files must have
+ * in order to use them within ParMooN. These files are used only for 2D 
+ * meshes. If your files do not follow this format, the behavior of the program 
+ * is undefined (however hopefully an error will occur and exit the program).
+ * The GEO file is passed as the parameter 'geo_file' and the PRM file as 
+ * 'boundary_file'.
+ *
+ * In 3D you should use mesh-files which can be created by hand or for example
+ * by <a href="http://gmsh.info/">gmsh</a>. Then the mesh file is passed as the
+ * parameter to 'geo_file' and 'boundary_file' may be left out.
+ * 
+ * \section sec_introduction Introduction
+ * The GEO and PRM files together describe a mesh which can be used within 
+ * ParMooN. The PRM file only describes the boundary while the GEO file 
+ * describes cells, vertices and such things. In general it is possible to 
+ * combine one GEO file with multiple PRM files and vice versa. However not all
+ * combinations are meaningful. In those cases we hope the program will 
+ * terminate and tell you what is wrong. This can not be guaranteed though.
+ * 
+ * \section sec_geo_file The GEO file
+ * The GEO file describes the mesh of a (2D) computational domain. The 
+ * first two lines in the GEO file are ignored and can therefore be used for 
+ * comments and descriptions. In the third line 5 numbers must appear, 
+ * separated by spaces. The numbers are
+ * - number of elements
+ * - number of vertices
+ * - a number which is ignored (e.g. set it to 0)
+ * - (maximum) number of vertices per element
+ * - another number which is ignored (it used to be the number of boundary 
+ *   components)
+ * 
+ * Then exactly one line is ignored (you can put a comment here, such as 
+ * "Vertices"). Next for each vertex one line follows specifying its 
+ * coordinates. So each line consists of 2 (the space dimension) numbers
+ * separated by spaces. Usually the numbers are the cartesian coordinates.
+ * However for points on the boundary a parametrization is given instead. The
+ * first number is the parameter (ranging from 0 to 
+ * the number of components) of the boundary part and the second number is 0. 
+ * Later on in the GEO file it is determined which vertices are on the boundary
+ * (and therefore specified by its paramater in the boundary parametrization) 
+ * and which ones are given via coordinates. After reading in all vertices, 
+ * exactly one line is ignored, you can for example put "elements" here. Then
+ * for each element there is one line determining its vertices (indices). So 
+ * there have to be 'maximum number of vertices per element'-many numbers in 
+ * each line. In meshes with different element types you can put 0 wherever
+ * no further vertices exist. For example "1 2 3 0" for a triangle with the 
+ * first three vertices, where there are also quadrilaterals in the grid. If 
+ * the file extension is 'xGEO' rather than 'GEO', on each line another number
+ * is read in which determines the reference_ID of the element. Note that the
+ * vertices in each element have to be ordered counterclockwise. After reading 
+ * in all elements exactly one line is ignored. Then it is determined which
+ * vertices belong to the boundary. So for each vertex there is one number. 0
+ * means it is an inner vertex, and is therefore given with cartesian
+ * coordinates earlier. Larger numbers correspond to which boundary part the 
+ * vertex belongs to.
+ *  
+ * 
+ * \section sec_prm_file The PRM file
+ * The PRM file describes the boundary of a (2D) computational domain.
+ * The first line is never read and can therefore be used for comments and 
+ * descriptions. The second line must consist of a number greater or equal to 1
+ * denoting the number of boundary parts. Then a line with contents "IBCT" 
+ * (index of boundary component) has to follow. It does not necessarily have to 
+ * follow directly in line three, even though this is the usual case. There can
+ * be other lines in between here as long as they don't contain "IBCT". The next
+ * line must consist of a single number. It is the index of the boundary part 
+ * which is described next. It must therefore be greater or equal to 1 and 
+ * smaller or equal to the number of boundary parts. The next line consists of 
+ * the string "NCOMP" (number of components); in fact there can be other lines 
+ * before with arbitrary contents as long as they don't contain "NCOMP", similar
+ * to where IBCT has been found. The next line must consist of a number which 
+ * is the number of boundary components for this boundary part. Again this 
+ * number must be greater or equal to 1. Next, a line with contents "ITYP
+ * NSPLINE NPAR" (type, unused, number of parameters) must follow (again, not
+ * necessarily directly). Then for each boundary component of this boundary type
+ * one line follows determining the type of boundary component. Each line 
+ * consists of three numbers. The first determines the type of boundary, see the
+ * following table. The second is ignored at the moment, so you can put e.g. a 1
+ * here. The third describes the number of parameters which are necessary to 
+ * define a boundary component of the given type. This third number more or less
+ * depends on the first, also see the following table: 
+ * 
+ * 
+ * |         | type | \#parameters | only for dimension |
+ * | :------ | :--: | :----------- | :----------------- |
+ * | line    | 1    | 2            | 2                  |
+ * | circle  | 2    | 3            | 2                  |
+ * | polygon | 4    | n            | 2 (not working)    |
+ * 
+ * Note that the polygon has twice as many parameters as points belong
+ * to it. Indeed the circle can be segments of such as well.
+ * 
+ * Now the next boundary part is described (if there is a second one at all). 
+ * This is done exactly the same way as the first: 
+ * find lines in the order 
+ * - find string "IBCT" and a number (index) in the next line 
+ * - find string "NCOMP"  and a number in the next line
+ * - find string "ITYP NSPLINE NPAR" and one line for each boundary component
+ *   describing it (type, number of parameters)
+ * 
+ * After all boundary parts have been described in this way, a line with string
+ * "PARAMETERS" is sought (again possibly other lines preceding it). Here the
+ * parameters necessary to describe the boundary components (of all parts) are
+ * listed in the order they appeared above. For each parameter 2
+ * values are read in. For example for a line 4 numbers have to be specified. 
+ * The only exception is the sphere, where really 4 parameters are needed. The 
+ * parameters can but need not be on the same line. What these parameters mean, 
+ * is listed below for each supported boundary component type:
+ * 
+ * - **line**: The first two values (\f$x\f$ and \f$y\f$) describe the first
+ *        point on this boundary component. The second two parameters 
+ *        (\f$t_x\f$ and \f$t_y\f$) are a vector pointing from the first to the 
+ *        second point of this boundary component. This line \f$L\f$ can 
+ *        therefore be parametrized as 
+ *        \f[ L = \left\{
+ *          \begin{pmatrix} x \\y \end{pmatrix}
+             + t \cdot \begin{pmatrix} t_x \\t_y \end{pmatrix}
+             \ \Big|\ t\in[0,1]
+             \right\} \f]
+ * - **circle**: The first two values (\f$x\f$ and \f$y\f$) describe the
+ *        center of this circle (segment). The second two values (\f$r_x\f$ and
+ *        \f$r_y\f$) describe the radii of the ellipsis this boundary component
+ *        belongs to. So choosing \f$r_x=r_y\f$ gives you a circular boundary
+ *        component. Also if you put \f$r_y=0\f$ it will be assumed that you
+ *        mean \f$r_x=r_y\f$. If \f$r_x \ne r_y\f$ the ellipsis has its major
+ *        axis on the x-axis. The third two values (\f$\alpha_1\f$ and
+ *        \f$\alpha_2\f$) desribe the starting and ending angle of this circle
+ *        segment. This circular segment \f$L\f$ can be parametrized as
+ *        \f[ 
+ *           L = \left\{
+ *          \begin{pmatrix} x \\y \end{pmatrix} 
+ *          + \begin{pmatrix} r_x & 0 \\ 0 & r_y \end{pmatrix}  
+ *            \begin{pmatrix} \cos (\alpha_1(1-t) + t\alpha_2) \\
+ *                            \sin (\alpha_1(1-t) + t\alpha_2) \end{pmatrix}\  
+ *          \Big|\  t\in[0,1] \right\}
+ *        \f]
+ *        The computational domain is inside the circle if 
+ *        \f$\alpha_1 < \alpha_2 \f$ and outside otherwise.
+ * - **polygon**: The first two values (\f$x_1\f$ and \f$y_2\f$) describe the
+ *        first point on this boundary component. The second two values 
+ *        (\f$x_2\f$ and \f$y_2\f$) describe the second point of this polygon.
+ *        This goes on until the n-th point (\f$x_n\f$ and \f$y_n\f$). If 
+ *        \f$t \in [(i-1)/(n-1), i/(n-1)] \f$ for some \f$i\in\{1,...,n-1\}\f$, 
+ *        then set \f$s = (n-1) \cdot t - (i-1) \in [0,1]\f$ and  
+ *        \f[ L_i = \{(x_i,y_i) + s\cdot(x_{i+1},y_{i+1}) | s\in[0,1]\}. \f]
+ *        The set described by this polygon is then 
+ *        \f$\bigcup_{i = 1}^{n-1} L_i\f$. Note however that the a parameter 
+ *        \f$t\f$ does not necessarily correspond to the distance along the 
+ *        polygon, i.e. if \f$t=0.5\f$ this does not correspond to the point 
+ *        half way along the polygon if the lengths of the \f$L_i\f$ are not
+ *        equal.
+ *
+ * Then everything is read in and further lines are ignored.
+ * 
+ * \note It is possible to have a polygon boundary component without having a 
+ *       vertex at each point of the polygon. However it is discouraged to 
+ *       really do that, because during refinement of such a mesh degenerate
+ *       elements may be produced, e.g. elements where three vertices lie on one
+ *       line. Currently ParMooN does not check if such elements were produced.
+ *       Furthermore it is discouraged to use a polygon which intersects 
+ *       itself, though it is ok to use a closed polygon where the first and the
+ *       last point are the same.
+ * 
+ * \section sec_example_prm_geo Examples
+ * Let's introduce a few examples of (x)GEO and PRM files to better understand 
+ * their format: 
+ * 
+ * \subsection subsec_example_prm_geo1 Two triangles on the unit square
+ * The domain is \f$ [0,1]^2 \f$ and it should be made up of two triangles. The
+ * PRM file is located at your_ParMooN_folder/data/geo_and_prm/UnitSquare.PRM 
+ * and looks like
+ * \includelineno UnitSquare.PRM
+ * It consists of one boundary part with four boundary components which are all
+ * of type 1 (line). The parameters can be understood as follows. Starting at 
+ * the coordinates \f$ (0,0) \f$ we go in the direction \f$ (1,0) \f$ ending up 
+ * at \f$ (1,0) \f$ (first three lines after PARAMETERS). Then go in the 
+ * direction \f$ (0,1) \f$ to end up at \f$ (1,1) \f$. Then go in the direction
+ * \f$ (-1,0) \f$ to end up at \f$ (0,1) \f$ and finally go down in the 
+ * direction \f$ (0,-1) \f$. This way you end at the starting coordinates 
+ * \f$ (0,0) \f$.
+ *
+ * The GEO file is located at
+ * your_ParMooN_folder/data/geo_and_prm/UnitSquareTwoTriangles_1.GEO and looks 
+like
+ * \includelineno UnitSquareTwoTriangles_1.GEO
+ * It specifies 2 elements, 4 vertices and 3 vertices per element (i.e.,
+ * triangles) in the third line. All vertices are specified using the boundary
+ * parametrization which can be seen from the last line of the file where you 
+ * can find a 1 for each of the four vertices, meaning they are all on the first
+ * (and only) boundary part. The first vertex has the parameter 0 it is 
+ * therefore located at the starting coordinates specified in the PRM file, so
+ * \f$ (0,0) \f$ in this case. The second vertex has the parameter 1 which means
+ * it is located at the second point specified in the PRM file, i.e.,
+ * \f$ (1,0) \f$. The third vertex has the parameter 2 which corresponds to the
+ * point \f$ (1,1) \f$ and the last vertex has the parameter 3 and hence has
+ * coordinates  \f$ (0,1) \f$. Note that the i-th boundary component is
+ * parametrized from i to i+1 (starting with i=0). If you wanted a vertex e.g. 
+ * at \f$ (1,0.6) \f$ this would correspond to the parameter 1.6.
+ *
+ * The resulting grid is
+ * \image html unitsquare_two_triangles.jpg
+ * \image latex unitsquare_two_triangles.eps
+ *
+ * Note that there are other GEO files which work with this PRM file. See e.g.
+ * data/UnitSquare.GEO and data/UnitSquareIrregular.GEO.
+ *
+ * \subsection subsec_example_prm_geo2 A rectangle with a hole
+ * This is example is used for a flow around a cylinder example in two space
+ * dimensions. The PRM file is located at
+ * your_ParMooN_folder/data/geo_and_prm/Benchmark.PRM and looks like
+ * \includelineno Benchmark.PRM
+ * The boundary consists of two boundary parts. The first describes the outer
+ * boundary and has four components. The second describes the hole and has one
+ * boundary component which is of type 2 (circle). The last three lines describe
+ * the coordinates of the center, the radii in \f$x\f$ and \f$y\f$ direction,
+ * and the starting and ending angle. The radii are chosen to be equal such that
+ * this is a circle, you can choose e.g. 0.03 for one of them to get an ellipse.
+ * The angles are \f$ \frac72\pi \f$ and \f$ \frac32\pi \f$ so that the domain
+ * is outside of the circle. The parameter \f$ t=0 \f$ is located on the circle
+ * at \f$(0.2,0.15)\f$, the parameter 0.5 is at \f$(0.2,0.25)\f$. The last four 
+ * lines in this file are read, but seem to remain unused unless the mesh 
+ * generator \em triangle is called. We need to check this!
+ *
+ * The GEO file is located at
+ * your_ParMooN_folder/data/geo_and_prm/bench_quad_comp.GEO and starts like
+ * \dontinclude bench_quad_comp.GEO
+ * \until DCORVG
+ * There are 208 elements (quadrilaterals), 250 vertices, 4 vertices per 
+ * element, and the space dimension is 2.
+ *
+ * The resulting mesh is
+ * \image html flow_around_cylinder_quads.jpg
+ * \image latex flow_around_cylinder_quads.eps
+ *
+ * Note that for this PRM file there is also a triangular mesh at
+ * your_ParMooN_folder/data/geo_and_prm/bench_tria_comp.GEO.
+ *
+ * \subsection subsec_example_prm_geo3 An example with two different reference ids.
+ * This example is used for the coupling of Stokes and Darcy equations. The two
+ * subdomains differ in their id, i.e. Stokes elements have a different id than
+ * the Darcy elements. The PRM file is located at
+ * your_ParMooN_folder/data/geo_and_prm/geo_and_prm/doubleRiverbed.PRM and looks
+ * like
+ * \includelineno doubleRiverbed.PRM
+ * The is one boundary part with six boundary components of type 1 (line). The
+ * first three will be for the Darcy subdomain outer boundary and the second
+ * three for the Stokes subdomain outer boundary. The first boundary component
+ * starts at \f$(0,1.5)\f$ and ranges to \f$(0,0)\f$. The other boundary
+ * components follow counterclockwise.
+ *
+ * The GEO file is located at
+ * your_ParMooN_folder/data/geo_and_prm/geo_and_prm/doubleRiverbed1.xGEO
+ * Note that this file has the extension xGEO which tells ParMooN to look for
+ * another number for each element which will be the reference id of that
+ * element. The interface is then implicitly defined to consist of all edges
+ * adjacent to elements of different reference id. The GEO file starts like
+ * \dontinclude doubleRiverbed1.xGEO
+ * \until DCORVG
+ * Then in the definition of the elements there are four numbers where the first
+ * three describe a triangle and the last is the reference id.
+ *
+ * The resulting mesh is
+ * \image html rectangle_riverbed.png
+ * \image latex rectangle_riverbed1.eps
+ * where the coloring indicates the two different reference ids.
+ */

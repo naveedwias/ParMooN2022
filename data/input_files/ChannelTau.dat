@@ -1,0 +1,149 @@
+################################################################################
+#                                                                              #
+#                   Input file for the example ChannelTau.h                    #
+#                                                                              #
+# The mesh is obtained with the Gmsh file ChannelTau.geo, for refined mesh too.#
+# DO NOT use the options sandwich_grid or refinement_n_initial_steps,          #
+# otherwise the mesh progression in the z-direction will not be respected.     #
+#                                                                              #
+################################################################################
+[ ParMooN database for TNSE3D ]
+
+verbosity: 3
+outfile: ChannelTau.out
+output_basename: ChannelTau
+output_directory: results
+output_write_vtk: true { true, false }
+output_write_subdomain_info: false { true, false }
+output_compute_errors: false { true, false }
+
+write_solution_binary: false
+#write_solution_binary_all_n_steps: 5
+#write_solution_binary_file: ./BIN
+
+#write_metis: false  { true, false }
+#write_metis_file: mesh_partitioning_proc.txt
+#read_metis: false  { true, false }
+#read_metis_file: mesh_partitioning_proc.txt
+
+geo_file: ./ChannelTau180_COS8x8x16.mesh
+## periodic_translations according to the domain dimensions, here: (4*Pi,0.,0., 0.,4*Pi/3,0.)
+#periodic_translations: (12.5663706143591725,0.,0., 0.,4.1887902047863905,0.)
+#sandwich_grid: false
+#refinement_n_initial_steps: 0
+
+## Determine which kind of problem you want to solve. A value of 0 means 
+## not set. Other values have the following meanings: 1: stationary 
+## convection-diffusion, 2: time-dependent 
+## convection-diffusion, 3: stationary Stokes, 4: time-dependent 
+## Stokes, 5: stationary Navier-Stokes, 6: time-dependent 
+## Navier-Stokes. 
+problem_type: 6   [ 0, 6 ]
+
+## Choose which example to run. Note that depending on the type of 
+## problem you want to solve, different values are meaningful here. 
+## See the class 'Example' and its derived classes.
+## ...
+## 11 - ChannelTau.h
+example: 11
+
+## Reynolds number
+reynolds_number: 180.0
+
+--------------------------------------------------------------------------------
+#### Parameters for non linear loop
+nonlinloop_maxit:   50  [ 0, 1000 ]
+nonlinloop_epsilon: 1e-6   [ 0, 1 ]
+nonlinloop_damping_factor: 1   [ 0, 1 ]
+nonlinloop_slowfactor: 100.0   [ 0, 100 ]
+nonlinloop_scale_epsilon_with_size: false   { true, false }
+
+#### Solver parameters
+solver_type: iterative  { direct, iterative }
+direct_solver_type: umfpack   { mumps, pardiso, umfpack }
+iterative_solver_type: fgmres   { bi_cgstab, cg, cgs, fgmres, jacobi, left_gmres, richardson, right_gmres, sor, ssor }
+max_n_iterations: 10   { 0, 1, 2, 3, 4, 5, 10, 100, 1000, 10000, 100000 }
+min_n_iterations: 1   { 0, 1, 2, 3, 4, 5, 10 }
+residual_tolerance: 7.0e-7  [ 0, 100 ]
+residual_reduction:  1e-1   [ 0, 1 ]
+gmres_restart: 20   [ 1, 1000 ]
+damping_factor: 0.95   [ 0, 1 ]
+preconditioner: least_squares_commutator   { least_squares_commutator, least_squares_commutator_boundary, multigrid, no_preconditioner, semi_implicit_method_for_pressure_linked_equations }
+multigrid_type: mdml {standard, mdml}.
+
+--------------------------------------------------------------------------------
+#### Multigrid parameters
+multigrid_n_levels: 1  [ 0, 5 ]
+multigrid_cycle_type: F   { F, V, W }
+multigrid_smoother: cell_vanka   { cell_vanka, cell_vanka_jacobi }
+multigrid_smoother_coarse: cell_vanka   { batch_vanka, cell_vanka, direct_solve, no_smoother, nodal_vanka, cell_vanka_jacobi }
+multigrid_correction_damp_factor: 0.75  [ 0, 1 ]
+multigrid_n_pre_smooth: 3   [ 1, 10 ]
+multigrid_n_post_smooth: 3   [ 1, 10 ]
+multigrid_coarse_residual: 0.1   [ 0, 1 ]
+multigrid_coarse_max_n_iterations: 100   [ 1, 100 ]
+multigrid_vanka_damp_factor: 0.75   [ 0, 1 ]
+
+--------------------------------------------------------------------------------
+## space discretization and intern parameters
+space_discretization_type: vms_projection {galerkin, supg, upwind, smagorinsky, cip, dg, symm_gls, nonsymm_gls, pspg, brezzi_pitkaeranta, vms_projection, vms_projection_expl, local_projection, local_projection_2_level, residual_based_vms}); 
+
+vms_projection_space_order: 0
+
+CELL_MEASURE: 2
+TURBULENT_VISCOSITY_TYPE: 7
+## 7: van Driest
+TURBULENT_VISCOSITY_CONSTANT: 0.01
+TURBULENT_VISCOSITY_POWER: 3
+TURBULENT_VISCOSITY_SIGMA: 2
+
+## for supg:
+#supg_delta0: 0.25
+#graddiv_stab: 1
+
+VELOCITY_SPACE: 12
+## 12: Q2/P1disc
+
+NSTYPE: 4
+LAPLACETYPE: 1
+laplace_type_deformation: true
+nse_nonlinear_form: convective
+UPWIND_ORDER: 1
+SCALE_DIVERGENCE_CONSTRAINT: 1
+
+## Default values
+#Par_P0: 0
+#Par_P3: 1
+
+--------------------------------------------------------------------------------
+## time discretization and time step lengths
+time_discretization: crank_nicolson { backward_euler, crank_nicolson, bdf_two, fractional_step }
+#bdf_two
+
+time_discretization_nonlinear_term: fully_implicit { fully_implicit, imex, fully_explicit }
+## if imex
+#extrapolation_type: linear { constant, linear }
+
+time_start: 0.
+time_end: 40.
+time_step_length: 0.004
+TIMESTEPLENGTH: 0.004
+steps_per_output: 100
+
+start_time_averaging_at: 10.
+
+--------------------------------------------------------------------------------
+#### Saddle_point_preconditioner
+[Saddle Point Preconditioner Database - velocity Solver]
+solver_type: iterative  { direct, iterative, petsc }
+#iterative_solver_type: bi_cgstab
+#max_n_iterations: 100
+#residual_reduction: 1e-4
+#residual_tolerance: 1e-8
+#preconditioner: ssor
+#sor_omega: 1.0
+
+--------------------------------------------------------------------------------
+[Saddle Point Preconditioner Database - pressure Solver]
+solver_type: direct  { direct, iterative, petsc }
+

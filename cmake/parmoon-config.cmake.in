@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+# unfortunately, the libraries are not exported by their alias name but by their
+# target name, which is parmoon_2d_${PARMOON_PARALLEL_TYPE} and 
+# parmoon_3d_${PARMOON_PARALLEL_TYPE}. So we make the parallel type of parmoon 
+# available here:
+set(PARMOON_PARALLEL_TYPE @PARMOON_PARALLEL_TYPE@)
+# in case we use MPI, there is no 2D library, 
+set(PARMOON_USING_MPI @PARMOON_USING_MPI@)
+# we have to set the c++ standard here, because the targets do not properly
+# export them in older cmake versions (<3.8), This is very unfortunate.
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT TARGET parmoon::parmoon_2d OR NOT TARGET parmoon::parmoon_3d)
+    include(${CMAKE_CURRENT_LIST_DIR}/parmoon-targets.cmake)
+endif()

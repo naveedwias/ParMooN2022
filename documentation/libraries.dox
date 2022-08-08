@@ -1,0 +1,174 @@
+/**
+\page external_libraries External libraries and ParMooN
+\author Clemens Bartsch <bartsch@wias-berlin.de>
+\date 2015/09/30
+
+\brief
+A how-to and why-so on including external libraries into ParMooN
+
+ParMooN depends on quite a bunch of external libraries, like an MPI implementation,
+a Threads library or the MUMPS solver, all of which have to be included by the 
+build system. We are using cmake as a platform independent building assistant. Cmake
+provides different ways of finding and including external libraries to a project.
+Here I want to explain the thoughts behind the current setup and give some advice
+on how to modify the external libraries.
+
+\tableofcontents
+
+\section libfinding How does cmake find libraries?
+\subsection findpackagecommand The find_package command, module mode and config mode
+cmake comes with a built-in solution to find external libraries - the "find_package"
+command. This has two operating modes, the "module" and "config" mode. I understand
+that the difference is that in module mode cmake is responsible for finding the
+package while in config mode the package is responsible for being found. Since
+config mode requires the package to be very well written, and for most 
+professionally written modules cmake comes with a built-in "find module", we will
+ignore config mode here and only deal with module mode.\n
+Let's assume we look for a package named "XXX". When adding a line "find_package(XXX MODULE)"
+to our CMakeLists.txt, cmake tries to find the package XXX by module mode (in fact, cmake
+defaults to module mode, but by typing MODULE we prevent it from switching to config mode
+when module mode did not succeed). Cmake looks for a file named "FindXXX.cmake" in its "Module"
+directory and executes that file. That's it, basically. The file "FindXXX.cmake" is called
+a "find module", and cmake ships with quite a lot of them. On my machine the default
+directory for find modules is "/usr/share/cmake/Modules/", and by examining that folder
+I can see what find modules cmake has, and what exactly they do by reading their
+code and comments.
+
+\subsection findmodules  What does a find module do
+The short, exact and useless answer is "that depends on the package you are looking for".
+For the long, inexact and (hopefully) useful answer, read on. Find modules follow the
+"principle of least surprise" they find the package for you (if they can) and tell you
+what you need to know, but they won't do the work of including the package. That's your
+job. A good example is the module "FindMPI". It searches through your system for an 
+MPI implementation and sets the following variables (according to its documentation)
+
+  > MPI_<lang>_FOUND    (TRUE if FindMPI found MPI flags for "<lang>")\n
+  > MPI_<lang>_COMPILER    (MPI Compiler wrapper for "<lang>") \n
+  > MPI_<lang>_COMPILE_FLAGS    (Compilation flags for MPI programs) \n
+  > MPI_<lang>_INCLUDE_PATH    (Include path(s) for MPI header(s)) \n
+  > MPI_<lang>_LINK_FLAGS    (Linking flags for MPI programs) \n
+  > MPI_<lang>_LIBRARIES    (All libraries to link MPI programs against) \n
+
+("<lang>" stands for "C", "CXX" or "Fortran") \n
+With all these variables set, it's in our responsibility to use them at the
+right place. Have a look into ParMooN's CMakeLists.txt to see how it's done there.
+Find modules for other packages might set different variables, more or less, but
+usually the XXX_LIBRARIES variable is there to use with the "target_link_libraries"
+command and an XXX_INCLUDE_PATH to hand over to the "include_directories" command.
+So that is what module mode is about - cmake calls a find module and lets it do its
+work, which usually boils down to setting all the variables which might be needed later,
+when including the found package.
+
+\section includestrategies So how can we chose which packages to include?
+Basically there are three "hard" (coded) ways to do it and a "soft" one. I will briefly name
+all of them.
+    - (hard) Use a default CMake find module.
+    - (hard) Write your own find module and let it do the work.
+    - (hard) Hard code the library to be found into the CMakeLists.txt
+    - (soft) use either way in a first run of cmake and then edit CMakeCache.txt
+	     to suit your needs.
+	     
+\section cache Wait a minute. What is the CMakeCache.txt?
+Cmake makes use of a cache for some variables. When running cmake for the first time for a project,
+it creates a file named CMakeCache.txt which contains variables whose values
+have been set at this first run and will be used at every later run, too.
+The cache is the one place which is intended to be modified by the user. We can interpret
+it as follows: at its first run, cmake fills the cache with a lot of variables and 
+proposes values for them. If the user is not satisfied with any of these proposals
+he or she simply modeifies them by writing into the CMakeCache.txt and cmake
+won't interfere (usually). \n
+For an explanation of the behaviour of cached variables, have a look 
+<a href="http://www.cmake.org/cmake/help/v3.0/command/set.html">here</a>.
+
+
+\section whatpolicy What is the policy used in ParMooN?
+My proposal, and the current setup of the CMake system, is the following.
+  - for all external packages which cmake provides a default find module
+    for, use that default find module and no excuses
+    (LAPACK incl. BLAS, OpenMP, MPI, Threads)
+  - those packages which cmake does not provide a find module for will be
+      - shipped with ParMooN
+      - their includes will be hard coded in the CMakeLists.txt
+      - if the user wants to include other implementations, he or she has to edit the CMakeLists.txt
+    (Parmetis, Metis, Triangle, Tetgen, Tecplot, Mumps and Umfpack and their various dependencies)
+  This also means that, until further notice, we will not use/write our own find modules.
+
+\section whypolicy Why is that the policy used in ParMooN?
+To me it seems best to stick to the intended usage of cmake as far as possible. Find modules are
+there to find wide spread packages which are present on most systems, exist in many different
+implementations and for very different architectures. 
+The cmake find modules are written and maintained by Kitware (the developers of cmake),
+and most of them are well written and work quite well. This explains our first policy, 
+"use default find modules whenever possible".
+We also rely on the users to install these very system specific packages on their own,
+and don't recommend to ship any of them along with ParMooN
+
+For external packages which are not as wide spread and quite specific to our computational
+goals (mesh partitioning, solving linear systems etc.) hard-coding seems the best alternative
+to us. We ship the package with ParMooN, we know where it is (in some subdirectory of the EXT_LIB
+directory), we know wht dependencies have to be resolved and we know, which version of the
+package your system needs (due to our _ARCH variable). So we hard-code all of that in the 
+CMakeLists.txt. When the user is not satisfied with the result, all he or she has to do,
+is opening the CMakeCache.txt and setting the unsatisfactory variable to something else.
+
+The alternative of writing own find modules is not a good option in my opinion. In the first case,
+for a wide spread package, there is no way how we could write a better find module then the 
+cmake developers, and why should we? In the second case it is taking a sledgehammer for cracking a nut,
+it is very hard to write a working find module and the other way (hard-coding + changing the cache)
+seems to work nicely.\n
+Should we nevertheless decide, that we need our own find modules, <a href="http://www.cmake.org/cgi-bin/viewcvs.cgi/CMake/Modules/readme.txt?view=markup">here</a>  is a set of rules
+which are highly recommended to follow when writing a find module.
+
+
+\section example Example
+A tiny example of the proposed way of customizing a package include in the CMakeCache.txt:
+
+The hard-coded include for TETGEN generates two lines in my CMakeCache.txt:
+
+> //Path to a file. \n
+> TETGEN_INCLUDE_DIR:PATH=/home/bartsch/code/ParMooN/ParMooN/EXT_LIB/tetgen \n
+> \n
+> //Path to a library. \n
+> TETGEN_LIBRARY:FILEPATH=/home/bartsch/code/ParMooN/ParMooN/EXT_LIB/tetgen/libtet_LINUX64.a \n
+
+Note that all variables dealing with the same package are prefixed with that packages name,
+here "TETGEN_".
+
+If Hang Si comes over to my office and tells me, that he has a better version of tetgen working
+and if I would like to try it out, I can immediately do so. Let's say Hang sends me the new
+header file and the already compiled library, and I save them as
+
+> /home/Clemens/BetterTetgen/includes/tetgen.h \n
+> /home/Clemens/BetterTetgen/Lib/libtetgen_better_for_clemens_machine.a
+
+respectively. Now all I have to do is change the corresponding lines in my CMakeCache.txt
+to the following:
+
+> //Path to a file. \n
+> TETGEN_INCLUDE_DIR:PATH=/home/Clemens/BetterTetgen/includes/tetgen \n
+> \n
+> //Path to a library. \n
+> TETGEN_LIBRARY:FILEPATH=/home/Clemens/BetterTetgen/Lib/libtetgen_better_for_clemens_machine.a \n
+
+CMake will notice the change in the cache, and the next time I compile a target which links in
+tetgen, my new tetgen library is linked against.
+
+For other, more extensive packages this will be a bit more difficult, but not very much so.
+
+\section details Some details on the implementation:
+Each package XXX which is first set to the ParMooN default populates the cache with some variables
+prefixed XXX_. So far these are XXX_INCLUDE_DIRECTORY which contains the path to the relevant
+header file and XXX_LIBRARY, which gives the path to the pre-compiled pacakge library. Should this
+library depend on further (static) libraries, say YYY and ZZZ then the path to these is stored as
+XXX_YYY_LIBRARY and XXX_ZZZA_LIBRARY. For these dependent libraries 'of second order' we don't
+need to include header files obviously. All the libraries which belong to one package are then grouped
+to a non-cache variable "XXX_LIBRARIES" and the include paths to "XXX_INCLUDE_DIRS" (which is usually
+the same as XXX_INCLUDE_DIR). These variables are then used later (internally) when linking against
+the library. Keeping the libraries apart like this enables the user to change each and every
+little dependent library by manipulating the CMakeCache.txt.
+After the finding of the paths and libraries and connecting them a conditional statement checks,
+wether everything needed has been found. This is just to mimic the REQUIRED behaviour of
+the find_package command, which we bypass by our hard-coding approach. That conditional statement
+just warns the user should he or she have accidentally deleted or moved one of the ParMooN
+external libraries. 
+*/

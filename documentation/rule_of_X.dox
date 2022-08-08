@@ -1,0 +1,76 @@
+/**
+\page page_rule_of_five The Rule Of Five
+\author Clemens Bartsch <clemens.bartsch@wias-berlin.de>
+\date 2016/02/02
+\brief Some shared knowledge and experience on the rule of five for special member functions
+
+\tableofcontents
+
+\section what_and_what_not What this is
+This is not an in-depth-explanation of the Rule of five. Instead it is a collection of insight gained into the matter when working with ParMooN and a collection of best-practice guidelines to stick to when coding C++ in ParMooN.
+
+\section basics The basics
+For each class you write there are five special member functions. These are
+    - copy constructor
+    - move constructor
+    - copy assignment operator
+    - move assignment operator
+    - destructor
+    
+Actually there is also the default constructor, but it really is a fickle thing and that's why we do not regard it here. Its implicit generation is prevented already by the presence of one single user generated compiler, which will be the case in 99% of your classes, I suppose. Forget about it. There is only five special member functions ("smfs"). 
+
+These five are special because
+    - the compiler can implicitely default generate them
+    - they determine your classes resource management
+    - you must take care of them or your class goes down the drain
+
+\section rule The rule of five
+I propose the following statement as Rule Of Five:
+    \note  Behold the special member functions.
+    
+There is a lot of more formulations out there, and even a lot of other numbers proposed. There is a rule of zero, a rule of three, a rule of four and even a rule of three-and-a-half. They usually wrap up a statement like: If you implement one smf yourself than you will have to give the same attention to X other smfs or your class will be broken. Some of these rules are not even rules but mere coding patterns. Since there is so many different opinions and different situations, I think it best to think of all smfs as a whole and call it a rule of five as stated above.
+    
+\section imp_generation Implicit generation
+What makes smfs so special is that the compiler is able to provide them implicitely without you declaring or defining them anwywhere. Implicit generation is a deceiving thing.
+Implicit generation and even linking to implicitely generated special member functions follows a raft of rules. These differ from compiler to compiler, version to version, C++ standard to C++ standard. Don't bother with these rules. The www is full of them and to me it's enough to stick to the following rule:
+Don't rely on the implicitely generated smfs for all but the most primitive classes which hold nothing but an int and a bool and some apple seeds.
+This is because: All implicitely generated smfs are shallow. The don't copy deep. They don't move deep. They don't delete deep. And you hardly ever know for sure if an implicitely generated function is there at all, you don't know if all compilers will do it as you want, and you can't debug them the usual way as you don't see them in the code.
+As soon as your class really manages heap allocated memory resources, you must write your own smfs.
+
+
+\section how_to How to write own smfs
+
+This is only some thoughts on how I do it, not a definite guide.
+
+If you are implementing a new class or refactoring an old one, you will have to sort out the smf issue. How you write them and which one you provide is a design issue and must be decided case to case. We highly encourage you to test all your smfs in your class' unit test, and also check that those which you wish deleted are really not there and not replaced in a crude manner by the compiler.
+
+Otherwise it is usually a good idea to start from the destructor.
+You must make sure that an object of your class tidies up behind it when it goes out of scope. Doing this gives you a good hint of which posessed objects you have to take care when writing the other smfs. 
+The next thing I usually write is the copy constructor. The object to be copied from should be passed by const &, everything else looks really suspicious and questions will be asked. The good thing about the copy constructor is that, due to the "const" you can't meddle with the copied-from object (putting aside keyword 'mutable', which seems big nonsense anyway).
+Then for the copy assignment I usually use the copy-and-swap idiom which has three advantages
+  - you don't need to check on self-assignment
+  - all you need is the (already implemented) copy constructor and a befriended swap function,
+  which is an absolute no-brainer
+  - due to its pass-by-value syntax "A& operator=(A other)" which does not differ between lvalue and rvalue it unifies copy- and move assignment and you won't have to implement a move assignment operator
+Because of the last point such a copy-and-swap designed "="-operator is also called "unified assignment operator". At the moment I am a big fan of it, maybe just because I have not discovered the downsides of it yet. If you find any, please let me now.
+Then the last thing is the move constructor. With polymorphism you will have to make use of std::move for the base class in the initializer list.
+
+For the unit test it is often a good idea to make the smfs print out something like "Copy assignment of class A called". This reassures you, that really the intended smf is called at the correct place. 
+
+
+\section visibility Rule of visibility
+In ParMooN we made good experience with what we call the rule of visibility. Make visible that you thought about the smfs by:
+  - declaring all of them in the header file
+  - commenting on them doxygen style: what went through your head when you implemented them?
+  - making use of the keywords "default" and "delete"
+Another thing which we want to make visible is that a certain class underwent Rule Of Five treatment. We mark that by adding the label "at"ruleof0 (yeah, 0, not 5...) to the leading doxygen comment block. This leads to the generation of a list of all safe-to-use classes in the documentation. That means, that when you write a new class which has class type members itself. If the classes of the members are listed in the Rule Of Zero list, you can safely use them in the stl and implement your own functioning smfs. If not, it means you must explicitely delete four of the smfs and declare the destructor default, which in ParMooN means most likely it will produce considerable memory leaks. And you should comment on why you did as you did ("underlying classes do not follow rule of 5 yet", "destructor will cause memory leaks still") and mark it all with a big TODO or FIXME.
+  
+One word upon keywords:
+  "delete" is a good word. It prevents the compiler from implicitely generating the so-marked smf. You don't want your class to be copied (and there may be really good reasons for that!) mark the copy constructor and copy assignment "= delete". You do not want an overloaded "=" for copying or moving? Mark both assignment operators as "= delete". And do not forget to comment, using doxygen syntax. Why was it a good idea to explicitely delete the destructor of you class so that it never releases its memory before the program terminates? Comment!
+  "default" is a bad word mostly. It means nothing but leaving everything to the compiler. Writing "smf = default" usually has the same behaviour as not declaring the smf at all (I would not bet on it being equal - with C++ compilers one never knows.) If you leave everything to the compiler like that you must have good reasons for believing that it won't disappoint you - and that is why declaring "smf = default" is better than not declaring at all, because now you can comment on your thoughts. I don't have to point out the absolute necessity of comments in such a difficile matter, do I?
+
+\section last_word One last word upon operator=
+
+Never even try to overload the operator = with anything else but a funtioning move/copy/unified assignment operator. Doing so is an accusable crime in fifteen European countries plus the states of Ohio, New Jersey and Delaware.
+
+*/

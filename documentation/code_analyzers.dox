@@ -1,0 +1,223 @@
+/**
+\page code_analyzers Code analyzers
+\brief A brief description on how to use code analyzing tools in ParMooN
+
+\attention this has only been tested a little bit and only on Linux
+
+\tableofcontents
+
+
+There are a number of good tools which are able to detect programming errors or
+style issues. The first and most often used one is the compiler. Every developer
+has to make sure that his code does not produce errors or warnings. In the past
+we had way too many warnings which made it impossible to see important ones. So
+please do not introduce further compiler warnings. It is a good idea to test 
+different compilers and different machines (linux, mac) resulting in different
+compiler warnings and errors.
+
+In the following the basisc usage of a few tools is presented. Note that you can
+run them also on only a subset of files. The way the commands are presented here
+all ParMooN source and header files are checked. 
+
+They usually give you warnings or even errors which can be very useful. 
+Sometimes these are only concerned with style issues but there have been errors
+which we would probably have missed without these tools.
+
+Each section on this page will introduce one tool. The simplest one is 
+'cppcheck'. 'clang-check' is a bit more involved but cmake can generate the 
+extra file which is needed. Much more difficult to use is 'clang scan-build'. 
+You probably want to use a separate build directory for that. These three tools
+are (static) code analyzers, which means they work during compile time or only
+on the source files. Analyzing ParMooN executable at runtime can be done by 
+other tools. Here we introduce 'valgrind'.
+
+
+
+
+\section cppcheck cppcheck
+The static analyzer cppcheck is easy to use and finds many different kinds of
+errors. You can call it from within your ParMooN directory
+\code{.sh}
+cppcheck –enable=all include/*/*.h src/*/*.C test/*.c++ [23]DPrograms/*.C 2&> cppcheck.txt
+\endcode
+This will create a file 'cppcheck.txt' which you can inspect. Every file is 
+checked with each possible combinations of preprocessor defines. Therefore some
+false positives might occur.
+
+Check out more options of this tool if you like. 
+
+
+
+
+
+\section clang_check clang-check
+For clang-check to work a special file is needed which basically consists of 
+information on how to compile ParMooN. Fortunately cmake will create this file
+for you
+\code{.sh}
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON relative/path/to/ParMooN
+\endcode
+This creates the file 'compile_commands.json' in the current directory (the 
+build directory). Of course you can add more options to cmake as usual or 
+change the value of 'CMAKE_EXPORT_COMPILE_COMMANDS' in your CMakeCache.txt file.
+Let's assume 'relative/path/to/ParMooN' is '../ParMooN'. Then you can run 
+'clang-check' as follows
+\code{.sh}
+clang-check ../ParMooN/src/*/*.C ../ParMooN/test/*.c++ ../ParMooN/[23]DPrograms/*.C 2&> clang_check.txt
+\endcode
+This tool and the clang compiler give similar messages.
+
+
+
+
+
+\section scan_build clang scan-build
+Using 'scan-build' is a bit more involved but produces very nice results. It
+basically replaces the compiler by its own one which, among other things, calls
+a regular compiler. So 'scan-build' changes the way ParMooN is built. It takes
+considerably longer to build. First you have to locate the program 
+'ccc-analyzer', which acts as the compiler wrapper:
+\code{.sh}
+locate ccc-analyzer
+\endcode
+For me this is in '/usr/bin/ccc-analyzer'. Then one has to replace the compiler
+to this one:
+\code{.sh}
+cmake -D CMAKE_CXX_COMPILER=/usr/bin/ccc-analyzer -D CMAKE_C_COMPILER=/usr/bin/ccc-analyzer -D CMAKE_BUILD_TYPE=Debug ../ParMooN
+\endcode
+Make sure you enable the 'Debug' mode. Next you can build. For that one has to
+precede the call to 'make' by 'scan-build'. The option '-o' sets an output 
+directory.
+\code{.sh}
+scan-build -o scan_build make parmoon_2d_SEQUENTIAL
+\endcode
+This will take longer than it usually does. You can do parallel builds as well
+(-j). Unfortunately I was not able to get the linker working correctly. There
+are always linking errors. I assume I simply don't use the tools correctly. 
+That's why I only compiled the library 'parmoon_2d_SEQUENTIAL'. You should 
+probably also try it for 3D. This then compiles almost all the code. Finally 
+the output can be inspected with 'scan-view'. Running 'scan-build' as above
+will print information to the console, mainly the same as running the compiler
+alone. In the last line it will tell you which directory to open. This is
+partly random (I think), I could call scan-view like this:
+\code{.sh}
+scan-view scan-build/2016-05-23-143620-3965-1
+\endcode
+This will open your browser with a summary and a list of all errors found. Click
+on them to see more information.
+
+
+
+
+
+
+\section valgrind valgrind
+In contrast to the tools introduced above, 'valgrind' does its checks during 
+runtime, not during compile time. Therefore you need a running program to start
+with. Also you have to compile with debug symbols, 'CMAKE_BUILD_TYPE=Debug'.
+Assume you usually run your program as
+\code{.sh}
+./nse2d nsed2d.dat
+\endcode
+'valgrind' has a number of very useful tools/options which will be presented in
+the following. In all cases using valgrind slows down the program a lot, e.g. 
+20 to 30 times slower! Therefore it is advisable to run these checks on small 
+examples. 
+
+This tool is able to find errors which the others can not. It is highly 
+recommended to use it every once in a while. There are many more options which
+are not discussed here. Check them out if your interested. 
+
+
+
+\subsection valgrind_memcheck memcheck - finding memory errors
+The default tool of valgrind is called memcheck, a memory error detector. Call
+it in its default behavior as
+\code{.sh}
+valgrind --log-file=valgrind.txt ./nse2d nse2d.dat
+\endcode
+This will already give you a lot of information (if errors occur at all) which 
+is written into the spcified log file. One other option to valgrind proved
+especially useful in this context, namely 
+\code{.sh}
+--leak-check=full
+\endcode
+This will make the run even slower, but helps to track the origin of memory 
+errors. Another useful option is then
+\code{.sh}
+--show-leak-kinds=all
+\endcode
+to see all memory which has not been deleted. This gives a lot of output.
+
+
+\subsection valgrind_callgrind callgrind - get a call graph and execution times
+The tool 'callgrind' can help you understanding the call graph of a program, 
+i.e., which function is called from where. Also it can tell you how often each
+function has been called and how long it took to execute. Run
+\code{.sh}
+valgrind --tool=callgrind ./nse2d nse2d.dat 
+\endcode
+This produces a file starting with 'callgrind.out.<pid>', where 'pid' is the 
+process id. This file can be opened by an external program called 'kcachegrind'.
+It is also possible to run a command line tool called 'callgrind_annotate', but
+I would recommend the graphical presentation of 'kcachegrind'. So call 
+\code{.sh}
+kcachegrind callgrind.out.<pid>
+\endcode
+and browse through the call graph. Note that the time measurements are not very
+precise especially on small examples. But they do serve as a hint.
+
+
+
+\subsection valgrind_massif massif - a heap profiler
+The massif tool provides information about memory allocated on the heap. It
+enables you to see which parts of your program result in memory peaks and also
+makes it possible to visually discover the severe memory leaks.
+you can start it with 
+\code{.sh}
+valgrind --tool=massif ./nse2d nse2d.dat
+\endcode
+but be prepared! It will take quite some time to come through. It by default 
+produces a file named "massif.out.<process_number>" which then can be examined
+using e.g. the massif visualizer tool found here:
+http://kde-apps.org/content/show.php?content=122409
+It will work for Linux with KDE only, if you are on a different platform try
+to find another gui or just use the massif terminal view tool "ms_print" to examine
+the output file.
+
+\subsection valgrind_cachgrind cachegrind - a cache and branch-prediction profiler
+to be written
+
+
+\subsection valgrind_mpi in parallel computations
+It is also possible to use the tools offered by valgrind in the case of an mpi
+parallel computation. Let's assume you usually run your mpi program as
+\code{.sh}
+mpiexec -n 2 ./cd3d_mpi cd3d.dat
+\endcode
+More processes are of course possible. Then you can use `valgrind` to write one
+logfile for each process:
+\code{.sh}
+mpiexec -n 2 valgrind --log-file=logfile.%p ./cd3d_mpi cd3d.dat
+\endcode
+The process number will be part of the file name. Additionally, it is possible
+to use the aforementioned tools, for example:
+\code{.sh}
+mpiexec -n 2 valgrind --leak-check=full --show-leak-kinds=all --log-file=logfile.%p ./cd3d_mpi cd3d.dat
+\endcode
+
+\section doxygen_code_analyzer doxygen
+Doxygen is used to automatically build the documentation. It writes a file 
+called 'doxygen_warnings_and_log.txt' which you can read as well to enhance the
+documentation.
+
+
+\section profiling
+\todo this should be on a separate page
+
+\section debugging
+\todo this should be on a separate page
+
+
+
+*/
